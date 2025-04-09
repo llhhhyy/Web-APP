@@ -1,0 +1,99 @@
+/* layout.css */
+
+/* 侧边栏整体样式 */
+.sider {
+    overflow: auto;
+    height: 100vh;
+    position: sticky;
+    inset-inline-start: 0;
+    top: 0;
+    bottom: 0;
+    scrollbar-gutter: stable;
+    width: 200px;
+    /* 添加侧边栏默认文字样式 */
+    font-family: 'Arial', sans-serif; /* 字体 */
+    color: #ffffff; /* 默认文字颜色 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 和 Edge */
+}
+
+/* 侧边栏用户区域 */
+.sider-user-section {
+    padding: 16px;
+    text-align: center;
+}
+
+/* 侧边栏菜单样式 */
+.sider-menu {
+    height: calc(100% - 64px);
+    border-right: 0;
+    background: #001529;
+    color: #fff;
+    /* 菜单文字样式 */
+    font-family: 'Arial', sans-serif; /* 菜单字体 */
+    font-size: 14px; /* 文字大小 */
+    font-weight: 400; /* 字重 */
+}
+
+/* 菜单项的具体样式 */
+.sider-menu .ant-menu-item,
+.sider-menu .ant-menu-submenu-title {
+    color: rgba(255, 255, 255, 0.65); /* 未选中状态颜色 */
+    font-family: inherit; /* 继承父元素的字体 */
+}
+
+/* 菜单项 hover 状态 */
+.sider-menu .ant-menu-item:hover,
+.sider-menu .ant-menu-submenu-title:hover {
+    color: #ffffff; /* hover 时颜色 */
+}
+
+/* 菜单项选中状态 */
+.sider-menu .ant-menu-item-selected {
+    color: #ffffff; /* 选中状态颜色 */
+    font-weight: 600; /* 选中时加粗 */
+}
+
+/* 菜单项中的链接样式 */
+.sider-menu a {
+    color: inherit; /* 继承父元素的颜色 */
+    text-decoration: none; /* 移除下划线 */
+}
+
+/* 链接 hover 状态 */
+.sider-menu a:hover {
+    color: #ffffff;
+}
+.sider::-webkit-scrollbar {
+    display: none;
+}
+
+.header {
+    padding: 0 24px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.header h1 {
+    margin: 0;
+    padding-left: 20px;
+    display: flex; /* 使用 flex 使图标和文字水平排列 */
+    align-items: center; /* 图标和文字垂直居中 */
+}
+
+.header-icon {
+    width: 26px; /* 设置图标宽度 */
+    height: 26px; /* 设置图标高度 */
+    margin-right: 12px; /* 图标和文字之间的间距 */
+}
+
+.header a {
+    text-decoration: none; /* 移除下划线 */
+    color: inherit; /* 继承父元素颜色 */
+}
+
+.header a:hover h1 {
+    color: #1890ff; /* 鼠标悬停时变为蓝色（Ant Design 默认蓝色） */
+}
