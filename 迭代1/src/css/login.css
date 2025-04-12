@@ -1,0 +1,29 @@
+
+.login-background {
+    background-image: url('../image/view1.png'); /* 路径需根据项目结构调整 */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-form {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 24px;
+    border-radius: 8px;
+    max-width: 400px;
+}
+
+.login-links {
+    margin-bottom: 24px; /* marginBlockEnd 在 CSS 中对应 margin-bottom */
+    display: flex;
+    justify-content: space-between; /* 左右分布链接 */
+}
+
+.forgot-password {
+    float: right; /* 保持右浮动效果 */
+    text-decoration: none; /* 可选：移除下划线 */
+}

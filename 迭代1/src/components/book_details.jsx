@@ -1,6 +1,6 @@
 import { Button, Col, Image, Row, Space, Tag, message } from "antd"; // 引入 message 组件
 import { Divider, Typography } from 'antd';
-import {ExclamationCircleOutlined, ShoppingCartOutlined, ShoppingOutlined} from '@ant-design/icons'
+import { ExclamationCircleOutlined } from '@ant-design/icons'
 
 const { Title, Paragraph } = Typography;
 
@@ -64,8 +64,8 @@ export default function BookDetails({ book }) {
                             </Space>
                         </div>
                         <Space>
-                            <Button icon={<ShoppingCartOutlined />} color="pink" size="large" onClick={handleAddToCart}>加入购物车</Button>
-                            <Button icon={<ShoppingOutlined />} color="pink" type="primary" size="large" variant="solid" onClick={handleBuyNow}>立即购买</Button>
+                            <Button size="large" onClick={handleAddToCart}>加入购物车</Button>
+                            <Button type="primary" size="large" onClick={handleBuyNow}>立即购买</Button>
                         </Space>
                     </Space>
                 </Typography>
