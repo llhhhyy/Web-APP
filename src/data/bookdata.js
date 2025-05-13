@@ -210,3 +210,23 @@ export const initialCartItems = [
         number: 1,
     },
 ];
+export const mockOrder = [
+    {
+        date: "2025-04-16 15:58:04",
+        quantity: 1,
+        productImage: "https://img3m0.ddimg.cn/4/24/9317290-1_u_6.jpg",
+        description: "JavaScript 编程思想",
+        price: "¥29.9",
+        status: "已完成",
+        recipient: "张三"
+    },
+    {
+        date: "2025-04-16 15:55:02",
+        quantity: 1,
+        productImage: "https://img3m5.ddimg.cn/18/16/11186350875-1_u_1.jpg",
+        description: "C++ Primer 中文版（第 5 版）",
+        price: "¥44.79",
+        status: "已完成",
+        recipient: "张三"
+    }
+];

@@ -1,4 +1,4 @@
-import { Avatar, Badge, Button, Card, Empty, Input, List, Space, Upload, Pagination } from "antd";
+import { Avatar, Badge, Button, Card, Empty, Input, List, Space, Upload} from "antd";
 import { UserContext } from "../lib/context";
 import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { useContext, useEffect, useState } from "react";
@@ -6,7 +6,7 @@ import UsernameAvatar from "./username_avatar";
 import useMessage from "antd/es/message/useMessage";
 import ImgCrop from 'antd-img-crop';
 import SaveAddressModal from "./save_address_modal";
-import { mockUser, getMockOrders } from "../data/bookdata";
+import { mockUser } from "../data/bookdata";
 
 export default function UserProfile() {
     const { user, setUser } = useContext(UserContext);
@@ -17,10 +17,7 @@ export default function UserProfile() {
     const [messageApi, contextHolder] = useMessage();
     const [addresses, setAddresses] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [orders, setOrders] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
-    const [totalOrders, setTotalOrders] = useState(0);
-    const pageSize = 5;
 
     useEffect(() => {
         if (!user) {
@@ -31,9 +28,6 @@ export default function UserProfile() {
             { id: 1, receiver: "张三", tel: "123-456-7890", address: "北京市朝阳区123号" },
             { id: 2, receiver: "李四", tel: "098-765-4321", address: "上海市浦东新区456路" },
         ]);
-        const { total, items } = getMockOrders(currentPage, pageSize);
-        setOrders(items);
-        setTotalOrders(total);
     }, [user, setUser, currentPage]);
 
     const beforeUpload = (file) => {
@@ -79,10 +73,6 @@ export default function UserProfile() {
 
     const handleEditAvatar = () => {
         setEditAvatar(true);
-    };
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page - 1);
     };
 
     const uploadButton = (
@@ -202,42 +192,6 @@ export default function UserProfile() {
                                     </List.Item>
                                 )}
                             />
-                        )}
-                    </Space>
-                </Card>
-
-                {/* 我的订单部分 */}
-                <Card title="我的订单" style={{ width: "400px" }}>
-                    <Space direction="vertical" style={{ width: "100%" }}>
-                        {orders.length === 0 && <Empty description="暂无订单" />}
-                        {orders.length > 0 && (
-                            <>
-                                <List
-                                    dataSource={orders}
-                                    renderItem={order => (
-                                        <List.Item>
-                                            <List.Item.Meta
-                                                title={order.bookTitle}
-                                                description={
-                                                    <Space direction="vertical">
-                                                        <span>价格：{(order.price / 100).toFixed(2)} 元</span>
-                                                        <span>数量：{order.quantity}</span>
-                                                        <span>状态：{order.status}</span>
-                                                        <span>下单时间：{new Date(order.createdAt).toLocaleString()}</span>
-                                                    </Space>
-                                                }
-                                            />
-                                        </List.Item>
-                                    )}
-                                />
-                                <Pagination
-                                    current={currentPage + 1}
-                                    pageSize={pageSize}
-                                    total={totalOrders}
-                                    onChange={handlePageChange}
-                                    style={{ textAlign: "center", marginTop: 16 }}
-                                />
-                            </>
                         )}
                     </Space>
                 </Card>

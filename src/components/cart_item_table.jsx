@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useMessage from "antd/es/message/useMessage";
 
+
 export default function CartItemTable({ cartItems: initialCartItems = [], onMutate }) {
     const [messageApi, contextHolder] = useMessage();
     const [items, setItems] = useState(initialCartItems || []);
@@ -41,7 +42,6 @@ export default function CartItemTable({ cartItems: initialCartItems = [], onMuta
     };
 
     const computeTotalPrice = () => {
-        // 添加调试信息
         console.log("Selected Items:", selectedItems);
 
         const total = selectedItems.reduce((sum, item) => {
@@ -51,7 +51,7 @@ export default function CartItemTable({ cartItems: initialCartItems = [], onMuta
             return sum + (price * number);
         }, 0);
 
-        return (total / 100).toFixed(2); // 转换为元并保留两位小数
+        return (total / 100).toFixed(2);
     };
 
     const computeItemPrice = (price, number) => {
@@ -120,12 +120,13 @@ export default function CartItemTable({ cartItems: initialCartItems = [], onMuta
             <Table
                 columns={columns}
                 rowSelection={{
+                    columnWidth: 4, // 设置选择列宽度为 40px
                     onChange: (_, selectedRows) => {
                         const updatedSelected = selectedRows.map(row => {
                             const matchingItem = items.find(item => item.id === row.id);
                             return matchingItem ? { ...row, number: matchingItem.number } : row;
                         });
-                        console.log("Updated Selected Items:", updatedSelected); // 调试选中项
+                        console.log("Updated Selected Items:", updatedSelected);
                         setSelectedItems(updatedSelected);
                     },
                 }}
