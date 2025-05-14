@@ -1,4 +1,3 @@
-// bookdata.js
 export const mockBooks = [
     {
         id: 1,
@@ -92,93 +91,7 @@ export const mockBooks = [
 
 export const mockTags = ["编程", "小说", "历史", "全部"];
 
-// 模拟评论数据（适用于所有书籍）
-export const generateMockComments = (bookId, pageIndex, pageSize, sort) => {
-    const totalComments = 20; // 假设每本书有 20 条评论
-    const allComments = Array.from({ length: totalComments }, (_, i) => ({
-        id: i + 1,
-        userId: (i % 5) + 1, // 模拟 5 个用户循环评论
-        username: `用户${(i % 5) + 1}`,
-        content: `这是关于书籍 ${bookId} 的第 ${i + 1} 条评论`,
-        createdAt: new Date(Date.now() - i * 86400000).toISOString(), // 模拟时间递减
-        like: Math.floor(Math.random() * 20), // 随机点赞数 (0-19)
-        liked: false,
-        avatar: null,
-        reply: i % 3 === 0 ? `用户${(i % 5) + 2}` : null, // 每 3 条有一条是回复
-    }));
-
-    // 根据 sort 排序
-    const sortedComments = [...allComments].sort((a, b) => {
-        if (sort === "like") return b.like - a.like; // 按点赞数降序
-        return new Date(b.createdAt) - new Date(a.createdAt); // 按时间降序
-    });
-
-    // 分页
-    const start = pageIndex * pageSize;
-    const end = start + pageSize;
-    const paginatedComments = sortedComments.slice(start, end);
-
-    return {
-        total: totalComments,
-        items: paginatedComments,
-    };
-};
-
-// 模拟用户信息
-export const mockUser = {
-    id: 1,
-    username: "testuser",
-    nickname: "测试用户",
-    balance: 10000, // 100.00 元
-    introduction: "你好，我是一个热爱读书的人！",
-    avatar: null,
-    email: "testuser@example.com",
-};
-
-// 模拟用户的订单数据
-export const mockOrders = [
-    {
-        id: 1,
-        bookId: mockBooks[0].id,
-        bookTitle: mockBooks[0].title,
-        price: mockBooks[0].price,
-        quantity: 2,
-        status: "已完成",
-        createdAt: "2025-03-01T10:00:00Z",
-    },
-    {
-        id: 2,
-        bookId: mockBooks[3].id,
-        bookTitle: mockBooks[3].title,
-        price: mockBooks[3].price,
-        quantity: 1,
-        status: "待发货",
-        createdAt: "2025-04-01T15:30:00Z",
-    },
-    {
-        id: 3,
-        bookId: mockBooks[7].id,
-        bookTitle: mockBooks[7].title,
-        price: mockBooks[7].price,
-        quantity: 3,
-        status: "已完成",
-        createdAt: "2025-02-15T09:15:00Z",
-    },
-];
-
-// 获取用户的订单数据（带分页）
-export const getMockOrders = (pageIndex, pageSize) => {
-    const start = pageIndex * pageSize;
-    const end = start + pageSize;
-    const paginatedOrders = mockOrders.slice(start, end);
-
-    return {
-        total: mockOrders.length,
-        items: paginatedOrders,
-    };
-};
-
-export const initialCartItems = [
+export let initialCartItems = [
     {
         id: 1,
         book: {
@@ -187,7 +100,7 @@ export const initialCartItems = [
             author: "张三",
             tag: "编程",
             cover: "https://img3m0.ddimg.cn/4/24/9317290-1_u_6.jpg",
-            price: 2990, // 29.90元
+            price: 2990,
             sales: 150,
             tags: [{ name: "编程" }, { name: "JavaScript" }],
             description: "深入探讨 JavaScript 的核心概念和编程思想，适合中高级开发者。",
@@ -210,6 +123,131 @@ export const initialCartItems = [
         number: 1,
     },
 ];
+
+export function addToCart(book, quantity = 1) {
+    const existingItem = initialCartItems.find(item => item.book.id === book.id);
+    if (existingItem) {
+        alert("该书籍已存在，数量加一");
+        existingItem.number += quantity;
+    } else {
+        alert("该书籍不存在");
+        initialCartItems.push({
+            id: initialCartItems.length + 1,
+            book: { ...book },
+            number: quantity,
+        });
+    }
+    return [...initialCartItems];
+}
+
+// 模拟用户的订单数据
+export let mockOrders = [
+    {
+        id: 1,
+        bookId: mockBooks[0].id,
+        bookTitle: mockBooks[0].title,
+        price: mockBooks[0].price,
+        quantity: 2,
+        status: "已完成",
+        createdAt: "2025-03-01T10:00:00Z",
+        recipient: "张三",
+        address: "北京市朝阳区XX路XX号",
+    },
+    {
+        id: 2,
+        bookId: mockBooks[3].id,
+        bookTitle: mockBooks[3].title,
+        price: mockBooks[3].price,
+        quantity: 1,
+        status: "待发货",
+        createdAt: "2025-04-01T15:30:00Z",
+        recipient: "李四",
+        address: "上海市浦东新区XX路XX号",
+    },
+    {
+        id: 3,
+        bookId: mockBooks[7].id,
+        bookTitle: mockBooks[7].title,
+        price: mockBooks[7].price,
+        quantity: 3,
+        status: "已完成",
+        createdAt: "2025-02-15T09:15:00Z",
+        recipient: "王五",
+        address: "广州市天河区XX路XX号",
+    },
+];
+
+// 添加新订单
+export function addOrder({ book, quantity, recipient, address }) {
+    const newOrder = {
+        id: mockOrders.length + 1,
+        bookId: book.id,
+        bookTitle: book.title,
+        price: book.price,
+        quantity,
+        status: "待发货",
+        createdAt: new Date().toISOString(),
+        recipient,
+        address,
+    };
+    mockOrders.push(newOrder);
+    return [...mockOrders];
+}
+
+// 获取用户的订单数据（带分页）
+export const getMockOrders = (pageIndex, pageSize) => {
+    const start = pageIndex * pageSize;
+    const end = start + pageSize;
+    const paginatedOrders = mockOrders.slice(start, end);
+
+    return {
+        total: mockOrders.length,
+        items: paginatedOrders,
+    };
+};
+
+// 模拟评论数据（适用于所有书籍）
+export const generateMockComments = (bookId, pageIndex, pageSize, sort) => {
+    const totalComments = 20;
+    const allComments = Array.from({ length: totalComments }, (_, i) => ({
+        id: i + 1,
+        userId: (i % 5) + 1,
+        username: `用户${(i % 5) + 1}`,
+        content: `这是关于书籍 ${bookId} 的第 ${i + 1} 条评论`,
+        createdAt: new Date(Date.now() - i * 86400000).toISOString(),
+        like: Math.floor(Math.random() * 20),
+        liked: false,
+        avatar: null,
+        reply: i % 3 === 0 ? `用户${(i % 5) + 2}` : null,
+    }));
+
+    const sortedComments = [...allComments].sort((a, b) => {
+        if (sort === "like") return b.like - a.like;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    const start = pageIndex * pageSize;
+    const end = start + pageSize;
+    const paginatedComments = sortedComments.slice(start, end);
+
+    return {
+        total: totalComments,
+        items: paginatedComments,
+    };
+};
+
+// 模拟用户信息
+export const mockUser = {
+    id: 1,
+    username: "testuser",
+    nickname: "测试用户",
+    balance: 10000,
+    introduction: "你好，我是一个热爱读书的人！",
+    avatar: null,
+    email: "testuser@example.com",
+};
+
+// 旧的 mockOrder 数据（不再使用）
 export const mockOrder = [
     {
         date: "2025-04-16 15:58:04",
@@ -218,7 +256,7 @@ export const mockOrder = [
         description: "JavaScript 编程思想",
         price: "¥29.9",
         status: "已完成",
-        recipient: "张三"
+        recipient: "张三",
     },
     {
         date: "2025-04-16 15:55:02",
@@ -227,6 +265,6 @@ export const mockOrder = [
         description: "C++ Primer 中文版（第 5 版）",
         price: "¥44.79",
         status: "已完成",
-        recipient: "张三"
-    }
+        recipient: "张三",
+    },
 ];

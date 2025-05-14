@@ -1,40 +1,65 @@
-import React from 'react';
-import {mockOrder} from '../data/bookdata'
-import '../css/order.css'
-import {PrivateLayout} from "../components/layout";
+import React from "react";
+import { Table, Image, Card } from "antd";
+import { PrivateLayout } from "../components/layout";
+import { mockOrders, mockBooks } from "../data/bookdata";
+import "../css/order.css";
 
 function OrderPage() {
+    const columns = [
+        {
+            title: "商品详情",
+            dataIndex: "bookId",
+            key: "book",
+            render: (bookId) => {
+                const book = mockBooks.find((b) => b.id === bookId);
+                return (
+                    <div className="product-details">
+                        <Image src={book.cover} alt={book.title} width={50} />
+                        <span style={{ marginLeft: 8 }}>{book.title}</span>
+                    </div>
+                );
+            },
+        },
+        {
+            title: "数量",
+            dataIndex: "quantity",
+            key: "quantity",
+            render: (quantity) => `x${quantity}`,
+        },
+        {
+            title: "价格",
+            dataIndex: "price",
+            key: "price",
+            render: (price) => `¥${(price / 100).toFixed(2)}`,
+        },
+        {
+            title: "收货人",
+            dataIndex: "recipient",
+            key: "recipient",
+        },
+        {
+            title: "收货地址",
+            dataIndex: "address",
+            key: "address",
+        },
+        {
+            title: "订单时间",
+            dataIndex: "createdAt",
+            key: "createdAt",
+            render: (createdAt) => new Date(createdAt).toLocaleString("zh-CN"),
+        },
+    ];
+
     return (
         <PrivateLayout>
-            <div className="order-page">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>商品详情</th>
-                        <th>数量</th>
-                        <th>价格</th>
-                        <th>收货人</th>
-                        <th>订单时间</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {mockOrder.map((order, index) => (
-                        <tr key={index}>
-                            <td>
-                                <div className="product-details">
-                                    <img src={order.productImage} alt="product"/>
-                                    <span>{order.description}</span>
-                                </div>
-                            </td>
-                            <td>x{order.quantity}</td>
-                            <td>{order.price}</td>
-                            <td>{order.recipient || 'N/A'}</td>
-                            <td>{order.date}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </div>
+            <Card className="card-container">
+                <Table
+                    columns={columns}
+                    dataSource={mockOrders.map((order) => ({ ...order, key: order.id }))}
+                    pagination={{ pageSize: 5 }}
+                    className="order-page"
+                />
+            </Card>
         </PrivateLayout>
     );
 }
