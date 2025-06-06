@@ -3,11 +3,14 @@ package com.bookstore.bookstore_backend.services.user;
 import com.bookstore.bookstore_backend.model.User.CommonAddress;
 import com.bookstore.bookstore_backend.model.User.LoginResponseDTO;
 import com.bookstore.bookstore_backend.model.User.User;
+import com.bookstore.bookstore_backend.model.User.UserAuth;
 import com.bookstore.bookstore_backend.model.User.UserDTO;
 import com.bookstore.bookstore_backend.repository.CommonAddressRepository;
+import com.bookstore.bookstore_backend.repository.UserAuthRepository;
 import com.bookstore.bookstore_backend.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +21,13 @@ public class UserService implements IUserService {
     private UserRepository userRepository;
 
     @Autowired
+    private UserAuthRepository userAuthRepository;
+
+    @Autowired
     private CommonAddressRepository commonAddressRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public User registerUser(UserDTO userDTO) {
@@ -27,43 +36,52 @@ public class UserService implements IUserService {
         }
 
         User user = new User();
-        BeanUtils.copyProperties(userDTO, user);
-        return userRepository.save(user);
+        BeanUtils.copyProperties(userDTO, user, "password"); // 排除 password 字段
+//        user = userRepository.save(user); // 确保持久化
+
+        UserAuth userAuth = new UserAuth();
+        userAuth.setPassword(userDTO.getPassword()); // 密码加密
+        userAuth.setUser(user);
+        user.setUserAuth(userAuth); // 级联管理 userAuth
+
+        return userRepository.save(user); // 级联保存 userAuth，无需单独调用 userAuthRepository.save(userAuth);
     }
 
     @Override
     public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() -> {
-            throw new IllegalArgumentException("用户不存在，参数异常");
-        });
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在，参数异常"));
     }
 
     @Override
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> {
-            throw new IllegalArgumentException("用户不存在，参数异常");
-        });
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在，参数异常"));
     }
 
     @Override
     public User updateUser(UserDTO userDTO) {
         User user = getUserById(userDTO.getId());
-        BeanUtils.copyProperties(userDTO, user);
+        BeanUtils.copyProperties(userDTO, user, "password"); // 排除 password 字段
         return userRepository.save(user);
     }
 
     @Override
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        userRepository.deleteById(id); // 由于 cascade = CascadeType.ALL，UserAuth 会自动删除
     }
 
     @Override
     public User updatePassword(Long userId, String newPassword) {
         User user = getUserById(userId);
-        if (newPassword == null || newPassword.length() < 6) {
-            throw new IllegalArgumentException("密码长度至少为6位");
+        UserAuth userAuth = user.getUserAuth();
+        if (userAuth == null) {
+            userAuth = new UserAuth();
+            user.setUserAuth(userAuth);
+            userAuth.setUser(user);
         }
-        user.setPassword(newPassword);
+        userAuth.setPassword(newPassword); // 密码会在 setter 中加密
+        user.setUserAuth(userAuth);
         return userRepository.save(user);
     }
 
@@ -109,7 +127,8 @@ public class UserService implements IUserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("用户名或密码错误"));
 
-        if (!user.getPassword().equals(password)) {
+        UserAuth userAuth = user.getUserAuth();
+        if (userAuth == null || !passwordEncoder.matches(password, userAuth.getPassword())) {
             throw new IllegalArgumentException("用户名或密码错误");
         }
 
@@ -117,12 +136,12 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void deleteAddress(Long userId,Long addressId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("用户id错误"));
-        List<CommonAddress> addressList = user.getCommonAddresses();
-        CommonAddress address = commonAddressRepository.findById(addressId).orElseThrow(()->new IllegalArgumentException("地址id错误"));
-        addressList.remove(address);
-        user.setCommonAddresses(addressList);
+    public void deleteAddress(Long userId, Long addressId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("用户id错误"));
+        CommonAddress address = commonAddressRepository.findById(addressId)
+                .orElseThrow(() -> new IllegalArgumentException("地址id错误"));
+        user.getCommonAddresses().remove(address);
         userRepository.save(user);
     }
 }

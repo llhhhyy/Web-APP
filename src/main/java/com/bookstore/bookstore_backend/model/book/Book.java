@@ -23,7 +23,7 @@ public class Book {
     private String cover; // 封面图片 URL
 
     @Column(nullable = false)
-    private Double price;
+    private String price;
 
     @Column(length = 2000) // 防止长度受限
     private String description;
@@ -57,11 +57,11 @@ public class Book {
         this.description = description;
     }
 
-    public Double getPrice() {
+    public String getPrice() {
         return price;
     }
 
-    public void setPrice(Double price) {
+    public void setPrice(String price) {
         this.price = price;
     }
 

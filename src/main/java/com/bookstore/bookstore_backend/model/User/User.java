@@ -3,7 +3,6 @@ package com.bookstore.bookstore_backend.model.User;
 import com.bookstore.bookstore_backend.model.cart.CartItem;
 import com.bookstore.bookstore_backend.model.order.OrderItem;
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,55 +11,44 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 主键，自动生成
+    private Long id;
 
     @Column(nullable = false, unique = true)
-    private String username; // 用户名，注册时设置
-
-    @Column(nullable = false)
-    private String password; // 密码，注册时设置
+    private String username;
 
     @Column(nullable = false)
     private String email;
 
-    private String avatar = "https://i-blog.csdnimg.cn/blog_migrate/a4fa5161369727154bc3a7d1c52bb9c0.png"; // 头像，默认值
+    private String avatar = "https://i-blog.csdnimg.cn/blog_migrate/a4fa5161369727154bc3a7d1c52bb9c0.png";
 
-    private String tagLine = ""; // 用户签名，默认空字符串
+    private String tagLine = "";
 
-    private Float balance = 1000.0f; // 余额，默认 1000 元
+    private Float balance = 1000.0f;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommonAddress> commonAddresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> cartItems;
+    private List<CartItem> cartItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> orderItems;
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "user_auth_id", referencedColumnName = "id", nullable = false, unique = true)
+    private UserAuth userAuth;
+
     // Getters and Setters
-
-    public List<OrderItem> getOrderItems() {
-        return orderItems;
+    public Role getRole() {
+        return role;
     }
 
-    public void setOrderItems(List<OrderItem> orderItems) {
-        this.orderItems = orderItems;
-    }
-
-    public void addOrderItem(OrderItem orderItem) {
-        orderItems.add(orderItem);
-    }
-
-    public List<CartItem> getCartItems() {
-        return cartItems;
-    }
-
-    public void setCartItems(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
-    }
-
-    public void addCartItem(CartItem cartItem) {
-        this.cartItems.add(cartItem);
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public Long getId() {
@@ -79,12 +67,12 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public String getEmail() {
+        return email;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getAvatar() {
@@ -111,14 +99,6 @@ public class User {
         this.balance = balance;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public List<CommonAddress> getCommonAddresses() {
         return commonAddresses;
     }
@@ -127,16 +107,49 @@ public class User {
         this.commonAddresses = commonAddresses;
     }
 
+    public List<CartItem> getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(List<CartItem> cartItems) {
+        this.cartItems = cartItems;
+    }
+
+    public void addCartItem(CartItem cartItem) {
+        this.cartItems.add(cartItem);
+    }
+
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = orderItems;
+    }
+
+    public void addOrderItem(OrderItem orderItem) {
+        this.orderItems.add(orderItem);
+    }
+
+    public UserAuth getUserAuth() {
+        return userAuth;
+    }
+
+    public void setUserAuth(UserAuth userAuth) {
+        this.userAuth = userAuth;
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", tagLine='" + tagLine + '\'' +
                 ", balance=" + balance +
-                ", commonAddress=" + commonAddresses +
+                ", role=" + role +
+                ", commonAddresses=" + commonAddresses +
                 '}';
     }
 }

@@ -1,6 +1,7 @@
 package com.bookstore.bookstore_backend.services.book;
 
 import com.bookstore.bookstore_backend.model.book.Book;
+import com.bookstore.bookstore_backend.model.book.BookDTO;
 import com.bookstore.bookstore_backend.model.comment.Comment;
 import com.bookstore.bookstore_backend.model.comment.CommentDTO;
 import com.bookstore.bookstore_backend.repository.BookRepository;
@@ -97,5 +98,22 @@ public class BookService implements IBookService {
     public Set<String> getAllTags() {
         List<List<String>> tagsList = bookRepository.findAllTags();
         return tagsList.stream().flatMap(List::stream).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Book updateBook(Long id, BookDTO bookDTO) {
+        if (id == null) {
+            throw new IllegalArgumentException("书籍ID不能为空");
+        }
+        if (bookDTO == null) {
+            throw new IllegalArgumentException("书籍信息不能为空");
+        }
+        if (bookDTO.getTitle() == null || bookDTO.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("书籍标题不能为空");
+        }
+        Book existingBook = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("书籍不存在，参数异常"));
+        BeanUtils.copyProperties(bookDTO, existingBook, "id", "comments");
+        return bookRepository.save(existingBook);
     }
 }

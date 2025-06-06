@@ -9,21 +9,21 @@ public class UserDTO {
     private Long id;
 //    @NotBlank(message = "用户名不能为空")
     private String username;
-//    @NotBlank(message = "密码不能为空")
-//    @Length(min=6, message = "密码长度至少为6位")
+
     private String password;
 //    @Email(message = "邮箱格式错误")
     private String email;
 //    @Pattern(regexp = "^(https?://.*\\.(?:png|jpg|jpeg|gif|svg))?$", message = "头像必须是有效的图片URL")
     private String avatar;
     private String tagLine;
+    private Role role = Role.USER;
 
-    public String getUsername() {
-        return username;
+    public Role getRole() {
+        return role;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public String getPassword() {
@@ -32,6 +32,14 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -75,6 +83,7 @@ public class UserDTO {
                 ", email='" + email + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", tagLine='" + tagLine + '\'' +
+                ", role=" + role +
                 '}';
     }
 }

@@ -1,6 +1,7 @@
 package com.bookstore.bookstore_backend.services.book;
 
 import com.bookstore.bookstore_backend.model.book.Book;
+import com.bookstore.bookstore_backend.model.book.BookDTO;
 import com.bookstore.bookstore_backend.model.comment.Comment;
 import com.bookstore.bookstore_backend.model.comment.CommentDTO;
 import org.springframework.data.domain.Page;
@@ -21,4 +22,5 @@ public interface IBookService {
     Comment addCommentToBook(Long bookId, CommentDTO comment);
     List<Comment> getCommentsByBookId(Long bookId);
     Set<String> getAllTags();
+    Book updateBook(Long id, BookDTO bookDTO);
 }

@@ -60,6 +60,13 @@ public class BookController {
         return ResponseMessage.success(newComment);
     }
 
+    @PutMapping("/update/{id}")
+    public ResponseMessage<Book> updateBook(@PathVariable Long id, @RequestBody BookDTO bookDTO) {
+        Book updatedBook = bookService.updateBook(id, bookDTO);
+        return ResponseMessage.success(updatedBook);
+    }
+
+
     @DeleteMapping("/delete/{id}")
     public ResponseMessage deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
