@@ -3,7 +3,7 @@ import { Content, Footer, Header } from "antd/es/layout/layout";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import { UserContext } from "../lib/context";
-import { dropMenuItems, siderMenuItems } from "./layout_Items";
+import { siderMenuItems } from "./layout_Items";
 import { UserOutlined } from "@ant-design/icons";
 import { BASEURL } from "../service/common";
 import "../css/layout.css";

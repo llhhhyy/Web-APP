@@ -16,10 +16,3 @@ export const siderMenuItems = [
     { key: "/order", label: "订单", icon: <ContainerOutlined /> },
     { key: "/admin", label: "管理", icon: <FormOutlined /> },
 ];
-
-export const dropMenuItems = [
-    { key: "nickname", label: "user", icon: <UserOutlined /> },
-    { key: "password", label: "修改密码", icon: <FormOutlined /> },
-    { key: "balance", label: `余额：1000元`, icon: <AccountBookOutlined /> },
-    { key: "/logout", label: "登出", icon: <LogoutOutlined />, danger: true },
-];
