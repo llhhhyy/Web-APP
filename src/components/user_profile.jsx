@@ -1,34 +1,47 @@
-import { Avatar, Badge, Button, Card, Empty, Input, List, Space, Upload} from "antd";
+import {Avatar, Badge, Button, Card, Empty, Input, List, Modal, Space, Upload} from "antd";
 import { UserContext } from "../lib/context";
-import { EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useContext, useEffect, useState } from "react";
-import UsernameAvatar from "./username_avatar";
 import useMessage from "antd/es/message/useMessage";
 import ImgCrop from 'antd-img-crop';
 import SaveAddressModal from "./save_address_modal";
-import { mockUser } from "../data/bookdata";
-
+import axios from 'axios';
+import { BASEURL } from "../service/common";
+axios.defaults.withCredentials = true;
 export default function UserProfile() {
     const { user, setUser } = useContext(UserContext);
-    const [imageUrl, setImageUrl] = useState();
+    const [imageUrl, setImageUrl] = useState(user?.avatar);
     const [editAvatar, setEditAvatar] = useState(false);
-    const [introduction, setIntroduction] = useState(user?.introduction || "");
+    const [introduction, setIntroduction] = useState(user?.tagLine || "");
     const [editIntroduction, setEditIntroduction] = useState(false);
     const [messageApi, contextHolder] = useMessage();
     const [addresses, setAddresses] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [currentPage, setCurrentPage] = useState(0);
+
+    const userId = user?.id;
 
     useEffect(() => {
-        if (!user) {
-            setUser(mockUser);
-            setIntroduction(mockUser.introduction);
+        if (userId) {
+            // 获取用户地址
+            axios.get(`${BASEURL}/users/get/${userId}/addresses`)
+                .then(response => {
+                    if (response.data.code === 200) {
+                        setAddresses(response.data.data.map(addr => ({
+                            id: addr.id,
+                            receiver: addr.recipient,
+                            tel: addr.phone,
+                            address: addr.address
+                        })));
+                    } else {
+                        messageApi.error("获取地址失败");
+                    }
+                })
+                .catch(error => {
+                    messageApi.error("获取地址失败");
+                    console.error(error);
+                });
         }
-        setAddresses([
-            { id: 1, receiver: "张三", tel: "123-456-7890", address: "北京市朝阳区123号" },
-            { id: 2, receiver: "李四", tel: "098-765-4321", address: "上海市浦东新区456路" },
-        ]);
-    }, [user, setUser, currentPage]);
+    }, [userId]);
 
     const beforeUpload = (file) => {
         const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
@@ -51,23 +64,79 @@ export default function UserProfile() {
     };
 
     const handleSaveIntroduction = () => {
-        setEditIntroduction(false);
-        setUser({ ...user, introduction });
-        messageApi.success("简介已更新");
+
+        axios.put(`${BASEURL}/users/${userId}/tagline`, { tagLine: introduction })
+            .then(response => {
+                if (response.data.code === 200) {
+                    setEditIntroduction(false);
+                    setUser({ ...user, tagLine: introduction });
+                    messageApi.success("简介已更新");
+                } else {
+                    messageApi.error("更新简介失败");
+                }
+            })
+            .catch(error => {
+                messageApi.error("更新简介失败,error");
+                console.error(error);
+            });
     };
 
     const handleDeleteAddress = (addressId) => {
-        setAddresses(addresses.filter(addr => addr.id !== addressId));
-        messageApi.success("地址已删除");
+        // 确认对话框（可选）
+        Modal.confirm({
+            title: '确认删除地址？',
+            content: '此操作不可撤销',
+            okText: '确认',
+            cancelText: '取消',
+            onOk: () => {
+                axios.delete(`${BASEURL}/users/delete/address/${userId}/${addressId}`)
+                    .then(response => {
+                        if (response.data.code === 200) {
+                            // 更新前端地址列表
+                            setAddresses(prev => prev.filter(addr => addr.id !== addressId));
+                            messageApi.success('地址已删除');
+                        } else {
+                            messageApi.error('删除失败：' + response.data.message);
+                        }
+                    })
+                    .catch(error => {
+                        messageApi.error('删除失败：网络错误');
+                        console.error(error);
+                    });
+            }
+        });
     };
 
     const handleChange = (info) => {
         if (info.file.status === 'done' || !info.file.status) {
-            setEditAvatar(false);
-            const mockAvatarUrl = URL.createObjectURL(info.file.originFileObj);
-            setUser({ ...user, avatar: mockAvatarUrl });
-            setImageUrl(mockAvatarUrl);
-            messageApi.success("头像已更新");
+            const formData = new FormData();
+            formData.append('file', info.file.originFileObj);
+
+            axios.post(`${BASEURL}/upload/avatar`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+                .then(response => {
+                    if (response.data.code === 200) {
+                        const avatarUrl = response.data.data;
+                        return axios.put(`${BASEURL}/users/${userId}/avatar`, { avatar: avatarUrl });
+                    } else {
+                        throw new Error("上传头像失败");
+                    }
+                })
+                .then(response => {
+                    if (response.data.code === 200) {
+                        setEditAvatar(false);
+                        setUser({ ...user, avatar: response.data.data.avatar });
+                        setImageUrl(response.data.data.avatar);
+                        messageApi.success("头像已更新");
+                    } else {
+                        messageApi.error("更新头像失败");
+                    }
+                })
+                .catch(error => {
+                    messageApi.error("更新头像失败");
+                    console.error(error);
+                });
         }
     };
 
@@ -88,14 +157,34 @@ export default function UserProfile() {
             {showModal && (
                 <SaveAddressModal
                     onOk={(newAddress) => {
-                        setShowModal(false);
-                        setAddresses([...addresses, { ...newAddress, id: Date.now() }]);
+                        axios.post(`${BASEURL}/users/${userId}/address`, {
+                            recipient: newAddress.receiver,
+                            phone: newAddress.tel,
+                            address: newAddress.address
+                        })
+                            .then(response => {
+                                if (response.data.code === 200) {
+                                    setShowModal(false);
+                                    setAddresses([...addresses, {
+                                        id: response.data.data.id,
+                                        receiver: newAddress.receiver,
+                                        tel: newAddress.tel,
+                                        address: newAddress.address
+                                    }]);
+                                    messageApi.success("地址已添加");
+                                } else {
+                                    messageApi.error("添加地址失败");
+                                }
+                            })
+                            .catch(error => {
+                                messageApi.error("添加地址失败");
+                                console.error(error);
+                            });
                     }}
                     onCancel={() => setShowModal(false)}
                 />
             )}
             <Space direction="vertical" style={{ width: "100%", alignItems: "center" }} size={16}>
-                {/* 头像部分 */}
                 <Space direction="vertical" style={{ textAlign: "center", width: "100%" }} size={2}>
                     {!editAvatar && (
                         <div style={{ textAlign: 'center' }}>
@@ -137,14 +226,14 @@ export default function UserProfile() {
                             </Upload>
                         </ImgCrop>
                     )}
-                    <span style={{ fontSize: 20 }}>{user?.nickname}</span>
+                    <span style={{ fontSize: 20 }}>{user?.username}</span>
                     <Space style={{ color: "grey", width: "100%", justifyContent: "center" }}>
                         {!editIntroduction && (
                             <>
                                 <span style={{ fontSize: 14, maxWidth: "500px", textAlign: "center" }}>
-                                    {user?.introduction ? user.introduction : "这个人很懒，什么也没留下"}
+                                    {user?.tagLine ? user.tagLine : "这个人很懒，什么也没留下"}
                                 </span>
-                                <a onClick={() => handleEditIntroduction(user?.introduction)}><EditOutlined /></a>
+                                <a onClick={() => handleEditIntroduction(user?.tagLine)}><EditOutlined /></a>
                             </>
                         )}
                         {editIntroduction && (
@@ -158,42 +247,50 @@ export default function UserProfile() {
                     </Space>
                 </Space>
 
-                {/* 基础信息部分 */}
                 <Card title="基础信息" style={{ width: "400px" }}>
                     <Space direction="vertical" style={{ width: "100%" }}>
-                        <span style={{ fontSize: 16, color: "#222222" }}>用户名：user</span>
-                        <span style={{ fontSize: 16, color: "#222222" }}>余额：{user?.balance / 100} 元</span>
-                        <span style={{ fontSize: 16, color: "#222222" }}>邮箱：123456789@163.com</span>
+                        <span style={{ fontSize: 16, color: "#222222" }}>用户名：{user?.username}</span>
+                        <span style={{ fontSize: 16, color: "#222222" }}>余额：{user?.balance} 元</span>
+                        <span style={{ fontSize: 16, color: "#222222" }}>邮箱：{user?.email}</span>
                     </Space>
                 </Card>
 
-                {/* 常用地址部分 */}
                 <Card
                     title="常用地址"
                     extra={<Button type="primary" onClick={() => setShowModal(true)}>添加</Button>}
                     style={{ width: "400px" }}
                 >
-                    <Space direction="vertical" style={{ width: "100%" }}>
-                        {addresses.length === 0 && <Empty description="无" />}
-                        {addresses.length > 0 && (
-                            <List
-                                dataSource={addresses}
-                                renderItem={address => (
-                                    <List.Item
-                                        actions={[
-                                            <a onClick={() => handleDeleteAddress(address.id)}>删除</a>,
-                                        ]}
-                                    >
-                                        <List.Item.Meta
-                                            avatar={<UsernameAvatar username={address.receiver} />}
-                                            title={`${address.receiver} ${address.tel}`}
-                                            description={address.address}
-                                        />
-                                    </List.Item>
-                                )}
-                            />
-                        )}
-                    </Space>
+                    {addresses.length === 0 ? (
+                        <Empty description="暂无常用地址" />
+                    ) : (
+                        <List
+                            dataSource={addresses}
+                            renderItem={item => (
+                                <List.Item
+                                    // actions={[
+                                    //     <Button
+                                    //         type="link"
+                                    //         icon={<DeleteOutlined />}
+                                    //         // onClick={() => handleDeleteAddress(item.id)}
+                                    //         danger
+                                    //     >
+                                    //         删除
+                                    //     </Button>
+                                    // ]}
+                                >
+                                    <List.Item.Meta
+                                        title={item.receiver}
+                                        description={
+                                            <>
+                                                <div>{item.tel}</div>
+                                                <div>{item.address}</div>
+                                            </>
+                                        }
+                                    />
+                               </List.Item>
+                            )}
+                        />
+                    )}
                 </Card>
             </Space>
         </Card>

@@ -5,36 +5,53 @@ import {
     ShoppingCartOutlined,
     ShoppingOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
-import { addToCart } from "../data/bookdata";
+import { useState, useContext } from "react";
 import OrderFormModal from "./order_form_model";
+import axios from "axios";
+import { BASEURL } from "../service/common";
+import { UserContext } from "../lib/context";
 
 const { Title, Paragraph } = Typography;
 
 export default function BookDetails({ book }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
+    const { user } = useContext(UserContext);
 
-    // 点击“加入购物车”的处理函数
-    const handleAddToCart = () => {
-        addToCart(book, 1);
-        message.success("已加入购物车");
+    const handleAddToCart = async () => {
+        if (!user?.id) {
+            message.error("请先登录");
+            return;
+        }
+        try {
+            const response = await axios.post(`${BASEURL}/cart/add/${user.id}`, {
+                bookId: book.id,
+                number: 1,
+            });
+            if (response.data.code === 200) {
+                message.success("已加入购物车");
+            } else {
+                message.error("加入购物车失败：" + response.data.message);
+            }
+        } catch (error) {
+            message.error("网络错误，请稍后重试");
+        }
     };
 
-    // 点击“立即购买”的处理函数
     const handleBuyNow = () => {
+        if (!user?.id) {
+            message.error("请先登录");
+            return;
+        }
         setIsModalOpen(true);
     };
 
-    // 取消订单表单
     const handleCancel = () => {
         setIsModalOpen(false);
     };
 
-    // 提交订单表单
     const handleOrderSubmit = () => {
         setIsModalOpen(false);
-        // 可添加导航到订单页面，如：navigate("/order");
     };
 
     return (
@@ -51,20 +68,18 @@ export default function BookDetails({ book }) {
                             <Paragraph>
                                 {`作者：${book.author}`}
                                 <Divider type="vertical" />
-                                {`销量：${book.sales}`}
+                                {`销量：${book.sales || 0}`}
                                 <Divider type="vertical" />
                                 标签：
                                 {book.tags.map((t) => (
-                                    <Tag key={t.name}>{t.name}</Tag>
+                                    <Tag key={t}>{t}</Tag>
                                 ))}
                             </Paragraph>
                         </Space>
                         <Divider orientation="left">作品简介</Divider>
                         <Paragraph>{book.description}</Paragraph>
                         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-                            <div
-                                style={{ backgroundColor: "#fcfaf7", padding: "20px", width: "100%" }}
-                            >
+                            <div style={{ backgroundColor: "#fcfaf7", padding: "20px", width: "100%" }}>
                                 <Paragraph style={{ marginBottom: 0 }} type="secondary">
                                     抢购价
                                 </Paragraph>
@@ -72,9 +87,9 @@ export default function BookDetails({ book }) {
                                     <Space>
                                         <div style={{ color: "#dd3735", fontSize: "16px" }}>¥</div>
                                         <div style={{ color: "#dd3735", fontSize: "30px" }}>
-                                            {book.price / 100}
+                                            {book.price}
                                         </div>
-                                        <div style={{ color: "#dd3735", fontSize: "18px" }}>（7折）</div>
+                                        <div style={{ color: "#dd3735", fontSize: "18px" }}>(7折)</div>
                                     </Space>
                                 </div>
                                 <div>

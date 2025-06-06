@@ -8,6 +8,7 @@ import OrderPage from "../page/order";
 // import RankPage from "../page/rank";
 // import ApiPage from "../page/api";
 import ProfilePage from "../page/profile";
+import AdministratorPage from "../page/administrator";
 // import OtherUserProfilePage from "../page/other_profile";
 // import CoursePage from "../page/course";
 
@@ -20,6 +21,8 @@ export default function AppRouter() {
                  <Route path="/book/:id" element={<BookPage />} />
                  <Route path="/cart" element={<CartPage />} />
                  <Route path="/order" element={<OrderPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/admin" element={<AdministratorPage />} />
                 {/* <Route path="/rank" element={<RankPage />} /> */}
                 {/* <Route path="/course" element={<CoursePage />} /> */}
                  <Route path="/profile" element={<ProfilePage />} />
