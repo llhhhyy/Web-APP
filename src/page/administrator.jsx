@@ -1,14 +1,13 @@
-import { Button, Card, Form, Input, Modal, Space, Table, Tag, message } from "antd";
+import { Button, Card, Form, Input, Modal, Space, Table, Tag, InputNumber } from "antd";
 import { PrivateLayout } from "../components/layout";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { BASEURL } from "../service/common";
 import useMessage from "antd/es/message/useMessage";
-import { useSearchParams } from "react-router-dom";
+import "../css/home.css"; // 复用 home.css 样式
 
-export default function AdministratorPage() {
+const AdministratorPage = () => {
     const [books, setBooks] = useState([]);
-    const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(false);
     const [addModalVisible, setAddModalVisible] = useState(false);
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -16,9 +15,6 @@ export default function AdministratorPage() {
     const [addForm] = Form.useForm();
     const [editForm] = Form.useForm();
     const [messageApi, contextHolder] = useMessage();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const pageIndex = Number(searchParams.get("pageIndex")) || 0;
-    const pageSize = Number(searchParams.get("pageSize")) || 5;
 
     // 获取书籍列表
     useEffect(() => {
@@ -26,34 +22,22 @@ export default function AdministratorPage() {
             setLoading(true);
             try {
                 const response = await axios.get(`${BASEURL}/books/find`, {
-                    params: { pageIndex, pageSize },
+                    params: { pageIndex: 0, pageSize: 1000 }, // 获取所有书籍
                 });
                 if (response.data.code === 200) {
-                    setBooks(response.data.data.map((book) => ({ ...book, key: book.id })));
-                    setTotal(response.data.total);
+                    setBooks(response.data.data);
                 } else {
                     messageApi.error("获取书籍列表失败");
-                    setBooks([]);
-                    setTotal(0);
                 }
             } catch (error) {
                 messageApi.error("获取书籍列表失败：网络错误");
-                setBooks([]);
-                setTotal(0);
+                console.error(error);
             } finally {
                 setLoading(false);
             }
         };
         fetchBooks();
-    }, [pageIndex, pageSize, messageApi]);
-
-    // 处理分页变化
-    const handlePageChange = (page, size) => {
-        setSearchParams({
-            pageIndex: (page - 1).toString(),
-            pageSize: size.toString(),
-        });
-    };
+    }, [messageApi]);
 
     // 添加书籍
     const handleAddBook = async (values) => {
@@ -65,21 +49,15 @@ export default function AdministratorPage() {
             const response = await axios.post(`${BASEURL}/books/save`, bookData);
             if (response.data.code === 200) {
                 messageApi.success("添加书籍成功");
+                setBooks([...books, response.data.data]);
                 setAddModalVisible(false);
                 addForm.resetFields();
-                // 刷新书籍列表
-                const fetchResponse = await axios.get(`${BASEURL}/books/find`, {
-                    params: { pageIndex, pageSize },
-                });
-                if (fetchResponse.data.code === 200) {
-                    setBooks(fetchResponse.data.data.map((book) => ({ ...book, key: book.id })));
-                    setTotal(fetchResponse.data.total);
-                }
             } else {
                 messageApi.error("添加书籍失败：" + response.data.message);
             }
         } catch (error) {
             messageApi.error("添加书籍失败：网络错误");
+            console.error(error);
         }
     };
 
@@ -93,21 +71,20 @@ export default function AdministratorPage() {
             const response = await axios.put(`${BASEURL}/books/update/${currentBook.id}`, bookData);
             if (response.data.code === 200) {
                 messageApi.success("修改书籍成功");
+                setBooks(
+                    books.map((book) =>
+                        book.id === currentBook.id ? response.data.data : book
+                    )
+                );
                 setEditModalVisible(false);
                 editForm.resetFields();
-                // 刷新书籍列表
-                const fetchResponse = await axios.get(`${BASEURL}/books/find`, {
-                    params: { pageIndex, pageSize },
-                });
-                if (fetchResponse.data.code === 200) {
-                    setBooks(fetchResponse.data.data.map((book) => ({ ...book, key: book.id })));
-                    setTotal(fetchResponse.data.total);
-                }
+                setCurrentBook(null);
             } else {
                 messageApi.error("修改书籍失败：" + response.data.message);
             }
         } catch (error) {
             messageApi.error("修改书籍失败：网络错误");
+            console.error(error);
         }
     };
 
@@ -117,20 +94,24 @@ export default function AdministratorPage() {
             const response = await axios.delete(`${BASEURL}/books/delete/${id}`);
             if (response.data.code === 200) {
                 messageApi.success("删除书籍成功");
-                // 刷新书籍列表
-                const fetchResponse = await axios.get(`${BASEURL}/books/find`, {
-                    params: { pageIndex, pageSize },
-                });
-                if (fetchResponse.data.code === 200) {
-                    setBooks(fetchResponse.data.data.map((book) => ({ ...book, key: book.id })));
-                    setTotal(fetchResponse.data.total);
-                }
+                setBooks(books.filter((book) => book.id !== id));
             } else {
                 messageApi.error("删除书籍失败：" + response.data.message);
             }
         } catch (error) {
             messageApi.error("删除书籍失败：网络错误");
+            console.error(error);
         }
+    };
+
+    // 打开编辑弹窗
+    const openEditModal = (book) => {
+        setCurrentBook(book);
+        editForm.setFieldsValue({
+            ...book,
+            tags: book.tags ? book.tags.join(", ") : "",
+        });
+        setEditModalVisible(true);
     };
 
     // 表格列定义
@@ -142,39 +123,24 @@ export default function AdministratorPage() {
             title: "标签",
             dataIndex: "tags",
             key: "tags",
-            render: (tags) => tags.map((tag, index) => <Tag key={index}>{tag}</Tag>),
+            render: (tags) =>
+                tags.map((tag) => <Tag key={tag}>{tag}</Tag>),
         },
         { title: "价格", dataIndex: "price", key: "price" },
-        { title: "封面URL", dataIndex: "cover", key: "cover" },
         { title: "描述", dataIndex: "description", key: "description" },
+        { title: "封面URL", dataIndex: "cover", key: "cover" },
         {
             title: "操作",
             key: "action",
             render: (_, record) => (
-                <Space>
-                    <Button
-                        type="primary"
-                        onClick={() => {
-                            setCurrentBook(record);
-                            editForm.setFieldsValue({
-                                ...record,
-                                tags: record.tags.join(", "), // 将标签数组转为逗号分隔的字符串
-                            });
-                            setEditModalVisible(true);
-                        }}
-                    >
+                <Space size="middle">
+                    <Button type="link" onClick={() => openEditModal(record)}>
                         编辑
                     </Button>
                     <Button
-                        type="primary"
+                        type="link"
                         danger
-                        onClick={() => {
-                            Modal.confirm({
-                                title: "确认删除",
-                                content: `确定要删除书籍 "${record.title}" 吗？`,
-                                onOk: () => handleDeleteBook(record.id),
-                            });
-                        }}
+                        onClick={() => handleDeleteBook(record.id)}
                     >
                         删除
                     </Button>
@@ -187,6 +153,7 @@ export default function AdministratorPage() {
         <PrivateLayout>
             {contextHolder}
             <Card
+                className="card-container"
                 title="书籍管理"
                 extra={
                     <Button type="primary" onClick={() => setAddModalVisible(true)}>
@@ -197,17 +164,13 @@ export default function AdministratorPage() {
                 <Table
                     columns={columns}
                     dataSource={books}
-                    pagination={{
-                        current: pageIndex + 1,
-                        pageSize,
-                        total,
-                        onChange: handlePageChange,
-                    }}
+                    rowKey="id"
                     loading={loading}
+                    pagination={false}
                 />
             </Card>
 
-            {/* 添加书籍模态框 */}
+            {/* 添加书籍弹窗 */}
             <Modal
                 title="添加书籍"
                 open={addModalVisible}
@@ -235,32 +198,34 @@ export default function AdministratorPage() {
                         <Input placeholder="请输入作者" />
                     </Form.Item>
                     <Form.Item name="tags" label="标签">
-                        <Input placeholder="请输入标签，用逗号分隔" />
+                        <Input placeholder="输入标签，用逗号分隔" />
                     </Form.Item>
-                    <Form.Item
-                        name="price"
-                        label="价格"
-                        rules={[{ required: true, message: "请输入价格" }]}
-                    >
-                        <Input placeholder="请输入价格" />
+                    <Form.Item name="price" label="价格">
+                        <InputNumber
+                            min={0}
+                            step={0.01}
+                            placeholder="请输入价格"
+                            style={{ width: "100%" }}
+                        />
+                    </Form.Item>
+                    <Form.Item name="description" label="描述">
+                        <Input.TextArea placeholder="请输入书籍描述" />
                     </Form.Item>
                     <Form.Item name="cover" label="封面URL">
                         <Input placeholder="请输入封面图片URL" />
                     </Form.Item>
-                    <Form.Item name="description" label="描述">
-                        <Input.TextArea placeholder="请输入书籍描述" rows={4} />
-                    </Form.Item>
                 </Form>
             </Modal>
 
-            {/* 修改书籍模态框 */}
+            {/* 编辑书籍弹窗 */}
             <Modal
-                title="修改书籍"
+                title="编辑书籍"
                 open={editModalVisible}
                 onOk={() => editForm.submit()}
                 onCancel={() => {
                     setEditModalVisible(false);
                     editForm.resetFields();
+                    setCurrentBook(null);
                 }}
                 okText="确认"
                 cancelText="取消"
@@ -281,23 +246,26 @@ export default function AdministratorPage() {
                         <Input placeholder="请输入作者" />
                     </Form.Item>
                     <Form.Item name="tags" label="标签">
-                        <Input placeholder="请输入标签，用逗号分隔" />
+                        <Input placeholder="输入标签，用逗号分隔" />
                     </Form.Item>
-                    <Form.Item
-                        name="price"
-                        label="价格"
-                        rules={[{ required: true, message: "请输入价格" }]}
-                    >
-                        <Input placeholder="请输入价格" />
+                    <Form.Item name="price" label="价格">
+                        <InputNumber
+                            min={0}
+                            step={0.01}
+                            placeholder="请输入价格"
+                            style={{ width: "100%" }}
+                        />
+                    </Form.Item>
+                    <Form.Item name="description" label="描述">
+                        <Input.TextArea placeholder="请输入书籍描述" />
                     </Form.Item>
                     <Form.Item name="cover" label="封面URL">
                         <Input placeholder="请输入封面图片URL" />
-                    </Form.Item>
-                    <Form.Item name="description" label="描述">
-                        <Input.TextArea placeholder="请输入书籍描述" rows={4} />
                     </Form.Item>
                 </Form>
             </Modal>
         </PrivateLayout>
     );
-}
+};
+
+export default AdministratorPage;
