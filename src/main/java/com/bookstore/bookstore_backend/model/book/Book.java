@@ -28,6 +28,9 @@ public class Book {
     @Column(length = 2000) // 防止长度受限
     private String description;
 
+    @Column(nullable = false)
+    private boolean deleted = false; // 新增删除标记字段，默认为false
+
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments; // 书籍评论
 
@@ -97,6 +100,14 @@ public class Book {
         this.title = title;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
     @Override
     public String toString() {
         return "Book{" +
@@ -107,6 +118,7 @@ public class Book {
                 ", cover='" + cover + '\'' +
                 ", price=" + price +
                 ", description='" + description + '\'' +
+                ", deleted=" + deleted +
                 ", comments=" + comments +
                 '}';
     }

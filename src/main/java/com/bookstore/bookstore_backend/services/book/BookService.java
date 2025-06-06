@@ -26,17 +26,17 @@ public class BookService implements IBookService {
 
     @Override
     public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+        return bookRepository.findAllByDeletedFalse();
     }
 
     @Override
     public Page<Book> getBooks(String keyword, String tag, Pageable pageable) {
-        return bookRepository.findBooksByKeywordAndTagWithPagination(keyword, tag, pageable);
+        return bookRepository.findBooksByKeywordAndTagWithPaginationAndNotDeleted(keyword, tag, pageable);
     }
 
     @Override
     public long countBooks(String keyword, String tag) {
-        return 0;
+        return bookRepository.countBooksByKeywordAndTagAndNotDeleted(keyword, tag);
     }
 
     @Override
@@ -44,8 +44,8 @@ public class BookService implements IBookService {
         if (id == null) {
             throw new IllegalArgumentException("书籍ID不能为空");
         }
-        return bookRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("书籍不存在，参数异常"));
+        return bookRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new IllegalArgumentException("书籍不存在或已被删除"));
     }
 
     @Override
@@ -64,10 +64,10 @@ public class BookService implements IBookService {
         if (id == null) {
             throw new IllegalArgumentException("书籍ID不能为空");
         }
-        if (!bookRepository.existsById(id)) {
-            throw new IllegalArgumentException("书籍不存在，参数异常");
-        }
-        bookRepository.deleteById(id);
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("书籍不存在，参数异常"));
+        book.setDeleted(true);
+        bookRepository.save(book);
     }
 
     @Override
@@ -81,8 +81,8 @@ public class BookService implements IBookService {
         if (commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
             throw new IllegalArgumentException("评论内容不能为空");
         }
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new IllegalArgumentException("书籍不存在，参数异常"));
+        Book book = bookRepository.findByIdAndDeletedFalse(bookId)
+                .orElseThrow(() -> new IllegalArgumentException("书籍不存在或已被删除"));
         Comment newComment = new Comment();
         BeanUtils.copyProperties(commentDTO, newComment);
         newComment.setBook(book);
@@ -96,7 +96,7 @@ public class BookService implements IBookService {
 
     @Override
     public Set<String> getAllTags() {
-        List<List<String>> tagsList = bookRepository.findAllTags();
+        List<List<String>> tagsList = bookRepository.findAllTagsByDeletedFalse();
         return tagsList.stream().flatMap(List::stream).collect(Collectors.toSet());
     }
 
@@ -111,8 +111,8 @@ public class BookService implements IBookService {
         if (bookDTO.getTitle() == null || bookDTO.getTitle().trim().isEmpty()) {
             throw new IllegalArgumentException("书籍标题不能为空");
         }
-        Book existingBook = bookRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("书籍不存在，参数异常"));
+        Book existingBook = bookRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new IllegalArgumentException("书籍不存在或已被删除"));
         BeanUtils.copyProperties(bookDTO, existingBook, "id", "comments");
         return bookRepository.save(existingBook);
     }

@@ -9,17 +9,26 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
-    @Query("SELECT DISTINCT tags FROM Book")
-    List<List<String>> findAllTags();
-    @Query("SELECT b FROM Book b WHERE (:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND (:tag IS NULL OR :tag MEMBER OF b.tags)")
-    Page<Book> findBooksByKeywordAndTagWithPagination(@Param("keyword") String keyword, @Param("tag") String tag, Pageable pageable);
 
-    @Query("SELECT b FROM Book b WHERE (:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND (:tag IS NULL OR :tag MEMBER OF b.tags)")
-    List<Book> findBooksByKeywordAndTag(@Param("keyword") String keyword, @Param("tag") String tag);
+    @Query("SELECT DISTINCT tags FROM Book WHERE deleted = false")
+    List<List<String>> findAllTagsByDeletedFalse();
 
-    @Query("SELECT COUNT(b) FROM Book b WHERE (:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND (:tag IS NULL OR :tag MEMBER OF b.tags)")
-    long countBooksByKeywordAndTag(@Param("keyword") String keyword, @Param("tag") String tag);
+    @Query("SELECT b FROM Book b WHERE (:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND (:tag IS NULL OR :tag MEMBER OF b.tags) AND b.deleted = false")
+    Page<Book> findBooksByKeywordAndTagWithPaginationAndNotDeleted(@Param("keyword") String keyword, @Param("tag") String tag, Pageable pageable);
+
+    @Query("SELECT b FROM Book b WHERE (:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND (:tag IS NULL OR :tag MEMBER OF b.tags) AND b.deleted = false")
+    List<Book> findBooksByKeywordAndTagAndNotDeleted(@Param("keyword") String keyword, @Param("tag") String tag);
+
+    @Query("SELECT COUNT(b) FROM Book b WHERE (:keyword IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(b.author) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND (:tag IS NULL OR :tag MEMBER OF b.tags) AND b.deleted = false")
+    long countBooksByKeywordAndTagAndNotDeleted(@Param("keyword") String keyword, @Param("tag") String tag);
+
+    @Query("SELECT b FROM Book b WHERE b.id = :id AND b.deleted = false")
+    Optional<Book> findByIdAndDeletedFalse(@Param("id") Long id);
+
+    @Query("SELECT b FROM Book b WHERE b.deleted = false")
+    List<Book> findAllByDeletedFalse();
 }

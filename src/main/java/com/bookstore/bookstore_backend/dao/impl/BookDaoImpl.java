@@ -19,22 +19,22 @@ public class BookDaoImpl implements BookDao {
 
     @Override
     public List<List<String>> findAllTags() {
-        return bookRepository.findAllTags();
+        return bookRepository.findAllTagsByDeletedFalse();
     }
 
     @Override
     public Page<Book> findBooksByKeywordAndTagWithPagination(String keyword, String tag, Pageable pageable) {
-        return bookRepository.findBooksByKeywordAndTagWithPagination(keyword, tag, pageable);
+        return bookRepository.findBooksByKeywordAndTagWithPaginationAndNotDeleted(keyword, tag, pageable);
     }
 
     @Override
     public List<Book> findBooksByKeywordAndTag(String keyword, String tag) {
-        return bookRepository.findBooksByKeywordAndTag(keyword, tag);
+        return bookRepository.findBooksByKeywordAndTagAndNotDeleted(keyword, tag);
     }
 
     @Override
     public long countBooksByKeywordAndTag(String keyword, String tag) {
-        return bookRepository.countBooksByKeywordAndTag(keyword, tag);
+        return bookRepository.countBooksByKeywordAndTagAndNotDeleted(keyword, tag);
     }
 
     @Override
