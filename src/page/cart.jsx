@@ -20,7 +20,7 @@ export default function CartPage() {
         const fetchCartItems = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${BASEURL}/cart/get/${user.id}`);
+                const response = await axios.get(`${BASEURL}/cart/get`);
                 if (response.data.code === 200) {
                     setCartItems(response.data.data);
                 } else {

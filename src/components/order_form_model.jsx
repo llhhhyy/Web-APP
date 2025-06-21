@@ -29,15 +29,17 @@ export default function OrderFormModal({
         }
         try {
             if (selectedItems && selectedItems.length > 0) {
+                console.log("选中的书籍:", selectedItems);
                 // Handle cart orders (multiple items)
                 for (const item of selectedItems) {
-                    const response = await axios.post(`${BASEURL}/order/add/${user.id}`, {
+                    const response = await axios.post(`${BASEURL}/order/add`, {
                         bookId: item.bookId,
                         number: item.number,
                         recipient: values.recipient,
                         phone: values.phone,
                         address: values.address,
                     });
+                    console.log(item.bookId);
                     if (response.data.code !== 200) {
                         message.error(`订单提交失败（书籍ID：${item.bookId}）：` + response.data.message);
                         return;
@@ -46,7 +48,7 @@ export default function OrderFormModal({
                 message.success("订单提交成功！");
             } else if (book) {
                 // Handle single book order (from book_details)
-                const response = await axios.post(`${BASEURL}/order/add/${user.id}`, {
+                const response = await axios.post(`${BASEURL}/order/add`, {
                     bookId: book.id,
                     number: values.quantity,
                     recipient: values.recipient,

@@ -121,7 +121,9 @@ export function PrivateLayout({ children }) {
 
     // 动态过滤菜单，仅在 role 为 ADMIN 时包含 /administrator
     const filteredMenuItems = siderMenuItems.filter(
-        (item) => item.key !== "/admin" || user?.role === "ADMIN"
+        (item) =>
+            !['/adminbook', '/adminorder', '/adminuser','/statistics'].includes(item.key) ||
+            user?.role === "ADMIN"
     );
 
     const selectedKey = filteredMenuItems.find((item) => item.key === location.pathname)?.key || "/";

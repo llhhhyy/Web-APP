@@ -101,7 +101,7 @@ const LoginPage = () => {
                         rules={[{ required: true, message: '请输入密码！' }]}
                     />
                     <div className="login-links">
-                        <a href="#/">新账号？前往注册</a>
+                        <a href="/register">新账号？前往注册</a>
                         <a href="#/" className="forgot-password">
                             忘记密码
                         </a>

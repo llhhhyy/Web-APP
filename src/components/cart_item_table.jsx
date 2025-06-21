@@ -96,19 +96,19 @@ export default function CartItemTable({ cartItems: initialCartItems = [], onMuta
 
     const handleOrderSubmit = async (values) => {
         try {
-            for (const item of selectedItems) {
-                const response = await axios.post(`${BASEURL}/order/add/${user.id}`, {
-                    bookId: item.bookId,
-                    number: item.number,
-                    recipient: values.recipient,
-                    phone: values.phone,
-                    address: values.address,
-                });
-                if (response.data.code !== 200) {
-                    messageApi.error(`订单提交失败（书籍ID：${item.bookId}）：` + response.data.message);
-                    return;
-                }
-            }
+            // for (const item of selectedItems) {
+            //     const response = await axios.post(`${BASEURL}/order/add`, {
+            //         bookId: item.bookId,
+            //         number: item.number,
+            //         recipient: values.recipient,
+            //         phone: values.phone,
+            //         address: values.address,
+            //     });
+            //     if (response.data.code !== 200) {
+            //         messageApi.error(`订单提交失败（书籍ID：${item.bookId}）：` + response.data.message);
+            //         return;
+            //     }
+            // }
 
             // 删除已提交的购物车项
             for (const item of selectedItems) {

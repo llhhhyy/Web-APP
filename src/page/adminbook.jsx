@@ -6,12 +6,13 @@ import { BASEURL } from "../service/common";
 import useMessage from "antd/es/message/useMessage";
 import "../css/home.css"; // 复用 home.css 样式
 
-const AdministratorPage = () => {
+const AdminBookPage = () => {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(false);
     const [addModalVisible, setAddModalVisible] = useState(false);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [currentBook, setCurrentBook] = useState(null);
+    const [searchKeyword, setSearchKeyword] = useState(""); // 新增搜索关键字状态
     const [addForm] = Form.useForm();
     const [editForm] = Form.useForm();
     const [messageApi, contextHolder] = useMessage();
@@ -22,7 +23,11 @@ const AdministratorPage = () => {
             setLoading(true);
             try {
                 const response = await axios.get(`${BASEURL}/books/find`, {
-                    params: { pageIndex: 0, pageSize: 1000 }, // 获取所有书籍
+                    params: {
+                        keyword: searchKeyword || null, // 使用搜索关键字
+                        pageIndex: 0,
+                        pageSize: 1000
+                    },
                 });
                 if (response.data.code === 200) {
                     setBooks(response.data.data);
@@ -37,7 +42,7 @@ const AdministratorPage = () => {
             }
         };
         fetchBooks();
-    }, [messageApi]);
+    }, [messageApi, searchKeyword]); // 添加 searchKeyword 作为依赖
 
     // 添加书籍
     const handleAddBook = async (values) => {
@@ -45,6 +50,7 @@ const AdministratorPage = () => {
             const bookData = {
                 ...values,
                 tags: values.tags ? values.tags.split(",").map((tag) => tag.trim()) : [],
+                inventory: values.inventory || 100, // 默认库存为100
             };
             const response = await axios.post(`${BASEURL}/books/save`, bookData);
             if (response.data.code === 200) {
@@ -110,6 +116,7 @@ const AdministratorPage = () => {
         editForm.setFieldsValue({
             ...book,
             tags: book.tags ? book.tags.join(", ") : "",
+            inventory: book.inventory || 100, // 确保库存字段有默认值
         });
         setEditModalVisible(true);
     };
@@ -127,6 +134,7 @@ const AdministratorPage = () => {
                 tags.map((tag) => <Tag key={tag}>{tag}</Tag>),
         },
         { title: "价格", dataIndex: "price", key: "price" },
+        { title: "库存", dataIndex: "inventory", key: "inventory" }, // 新增库存列
         { title: "描述", dataIndex: "description", key: "description" },
         { title: "封面URL", dataIndex: "cover", key: "cover" },
         {
@@ -156,9 +164,17 @@ const AdministratorPage = () => {
                 className="card-container"
                 title="书籍管理"
                 extra={
-                    <Button type="primary" onClick={() => setAddModalVisible(true)}>
-                        添加书籍
-                    </Button>
+                    <Space>
+                        <Input
+                            placeholder="按书名搜索"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            style={{ width: 200 }}
+                        />
+                        <Button type="primary" onClick={() => setAddModalVisible(true)}>
+                            添加书籍
+                        </Button>
+                    </Space>
                 }
             >
                 <Table
@@ -206,6 +222,19 @@ const AdministratorPage = () => {
                             step={0.01}
                             placeholder="请输入价格"
                             style={{ width: "100%" }}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        name="inventory"
+                        label="库存"
+                        rules={[{ required: true, message: "请输入库存数量" }]}
+                    >
+                        <InputNumber
+                            min={0}
+                            step={1}
+                            placeholder="请输入库存数量"
+                            style={{ width: "100%" }}
+                            defaultValue={100}
                         />
                     </Form.Item>
                     <Form.Item name="description" label="描述">
@@ -256,6 +285,18 @@ const AdministratorPage = () => {
                             style={{ width: "100%" }}
                         />
                     </Form.Item>
+                    <Form.Item
+                        name="inventory"
+                        label="库存"
+                        rules={[{ required: true, message: "请输入库存数量" }]}
+                    >
+                        <InputNumber
+                            min={0}
+                            step={1}
+                            placeholder="请输入库存数量"
+                            style={{ width: "100%" }}
+                        />
+                    </Form.Item>
                     <Form.Item name="description" label="描述">
                         <Input.TextArea placeholder="请输入书籍描述" />
                     </Form.Item>
@@ -268,4 +309,4 @@ const AdministratorPage = () => {
     );
 };
 
-export default AdministratorPage;
+export default AdminBookPage;

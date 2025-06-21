@@ -1,12 +1,17 @@
+/* 修改 .order-page 部分 */
 .order-page {
     max-width: 1200px;
     margin: 0 auto;
     font-family: Arial, sans-serif;
+    padding: 0 20px;
 }
+
+/* 新增表格布局调整 */
 table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    table-layout: fixed; /* 确保表格布局稳定 */
 }
 thead {
     background-color: #f0f0f0;
@@ -19,25 +24,54 @@ th, td {
 th:last-child, td:last-child {
     border-right: none;
 }
-th:nth-child(1) {
-    width: 33.33%;
-    text-align: center; /* Center the header text */
-}
-td:nth-child(1) {
-    width: 33.33%;
-    text-align: left; /* Keep the content left-aligned */
-}
-th:nth-child(2), td:nth-child(2),
-th:nth-child(3), td:nth-child(3),
-th:nth-child(4), td:nth-child(4),
-th:nth-child(5), td:nth-child(5) {
-    width: 8.33%;
+
+/* 订单ID列自适应 */
+th:nth-child(1), td:nth-child(1) {
+    width: auto; /* 改为自适应宽度 */
+    min-width: 80px; /* 最小宽度保证 */
     text-align: center;
 }
-td:nth-child(3) {
+
+/* 调整其他列宽 */
+th:nth-child(2), td:nth-child(2) {
+    width: 12%;
+    text-align: center;
+}
+th:nth-child(3), td:nth-child(3) {
+    width: 20%;
+    text-align: left;
+}
+th:nth-child(4), td:nth-child(4),
+th:nth-child(5), td:nth-child(5) {
+    width: 8%;
+    text-align: center;
+}
+th:nth-child(6), td:nth-child(6) {
+    width: 22%;
+    text-align: left;
+}
+th:nth-child(7), td:nth-child(7) {
+    width: 15%;
+    text-align: center;
+}
+
+td:nth-child(4) {
     color: red;
     font-weight: bold;
 }
+
+/* 优化收货信息显示 */
+.recipient-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.recipient-info .address {
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+/* 其余样式保持不变 */
 .product-details {
     display: flex;
     align-items: center;
@@ -54,4 +88,35 @@ td:nth-child(3) {
 }
 tbody tr {
     border-bottom: 1px solid #e8e8e8;
+}
+.card-container {
+    margin: 20px 0;
+}
+/*.search-container {*/
+/*    margin-bottom: 20px;*/
+/*    padding: 16px;*/
+/*    background-color: #f5f5f5;*/
+/*    border-radius: 4px;*/
+/*}*/
+.table-container {
+    margin-top: 20px;
+}
+.order-page .search-container {
+    margin-bottom: 20px;
+}
+.order-page .card-container {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.product-details .book-info {
+    margin-left: 12px;
+}
+.product-details .book-title {
+    font-weight: 500;
+    max-width: 200px;
+}
+.total-price {
+    font-weight: bold;
+    color: #f5222d;
 }

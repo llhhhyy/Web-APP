@@ -24,7 +24,7 @@ export default function BookDetails({ book }) {
             return;
         }
         try {
-            const response = await axios.post(`${BASEURL}/cart/add/${user.id}`, {
+            const response = await axios.post(`${BASEURL}/cart/add`, {
                 bookId: book.id,
                 number: 1,
             });

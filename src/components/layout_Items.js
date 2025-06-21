@@ -6,7 +6,7 @@ import {
     HomeOutlined,
     ShoppingCartOutlined,
     ProfileOutlined,
-    ContainerOutlined,
+    ContainerOutlined, BarChartOutlined,
 } from '@ant-design/icons';
 
 export const siderMenuItems = [
@@ -14,5 +14,8 @@ export const siderMenuItems = [
     { key: "/profile", label: "个人主页", icon: <ProfileOutlined /> },
     { key: "/cart", label: "购物车", icon: <ShoppingCartOutlined /> },
     { key: "/order", label: "订单", icon: <ContainerOutlined /> },
-    { key: "/admin", label: "管理", icon: <FormOutlined /> },
+    { key: "/adminbook", label: "书籍管理", icon: <FormOutlined /> },
+    { key: "/adminorder", label: "订单管理", icon: <FormOutlined /> },
+    { key: "/adminuser", label: "用户管理", icon: <FormOutlined /> },
+    { key: "/statistics", label: "统计", icon:<BarChartOutlined /> },
 ];

@@ -1,4 +1,4 @@
-import {Avatar, Badge, Button, Card, Empty, Input, List, Modal, Space, Upload} from "antd";
+import {Avatar, Badge, Button, Card, Empty, Input, List, Modal, Space, Upload, DatePicker, Table} from "antd";
 import { UserContext } from "../lib/context";
 import { EditOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useContext, useEffect, useState } from "react";
@@ -8,21 +8,26 @@ import SaveAddressModal from "./save_address_modal";
 import axios from 'axios';
 import { BASEURL } from "../service/common";
 axios.defaults.withCredentials = true;
+
+const { RangePicker } = DatePicker;
+
 export default function UserProfile() {
     const { user, setUser } = useContext(UserContext);
     const [imageUrl, setImageUrl] = useState(user?.avatar);
-    const [editAvatar, setEditAvatar] = useState(false);
     const [introduction, setIntroduction] = useState(user?.tagLine || "");
+    const [editAvatar, setEditAvatar] = useState(false);
     const [editIntroduction, setEditIntroduction] = useState(false);
     const [messageApi, contextHolder] = useMessage();
     const [addresses, setAddresses] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [dateRange, setDateRange] = useState([]);
+    const [statistics, setStatistics] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const userId = user?.id;
 
     useEffect(() => {
         if (userId) {
-            // 获取用户地址
             axios.get(`${BASEURL}/users/get/${userId}/addresses`)
                 .then(response => {
                     if (response.data.code === 200) {
@@ -64,7 +69,6 @@ export default function UserProfile() {
     };
 
     const handleSaveIntroduction = () => {
-
         axios.put(`${BASEURL}/users/${userId}/tagline`, { tagLine: introduction })
             .then(response => {
                 if (response.data.code === 200) {
@@ -76,13 +80,12 @@ export default function UserProfile() {
                 }
             })
             .catch(error => {
-                messageApi.error("更新简介失败,error");
+                messageApi.error("更新简介失败");
                 console.error(error);
             });
     };
 
     const handleDeleteAddress = (addressId) => {
-        // 确认对话框（可选）
         Modal.confirm({
             title: '确认删除地址？',
             content: '此操作不可撤销',
@@ -92,7 +95,6 @@ export default function UserProfile() {
                 axios.delete(`${BASEURL}/users/delete/address/${userId}/${addressId}`)
                     .then(response => {
                         if (response.data.code === 200) {
-                            // 更新前端地址列表
                             setAddresses(prev => prev.filter(addr => addr.id !== addressId));
                             messageApi.success('地址已删除');
                         } else {
@@ -144,12 +146,44 @@ export default function UserProfile() {
         setEditAvatar(true);
     };
 
+    const fetchStatistics = () => {
+        if (!dateRange || dateRange.length !== 2) {
+            messageApi.error("请选择时间范围");
+            return;
+        }
+        setLoading(true);
+        const [start, end] = dateRange;
+        axios.get(`${BASEURL}/order/statistics`, {
+            params: {
+                startTime: start.toISOString(),
+                endTime: end.toISOString()
+            }
+        })
+            .then(response => {
+                if (response.data.code === 200) {
+                    setStatistics(response.data.data);
+                } else {
+                    messageApi.error("获取统计数据失败");
+                }
+            })
+            .catch(error => {
+                messageApi.error("获取统计数据失败");
+                console.error(error);
+            })
+            .finally(() => setLoading(false));
+    };
+
     const uploadButton = (
         <button style={{ border: 0, background: 'none' }} type="button">
             <PlusOutlined />
             <div>上传</div>
         </button>
     );
+
+    const columns = [
+        { title: '书籍标题', dataIndex: 'bookTitle', key: 'bookTitle' },
+        { title: '购买数量', dataIndex: 'quantity', key: 'quantity' }
+    ];
 
     return (
         <Card style={{ width: "800px", margin: "20px auto" }}>
@@ -266,18 +300,7 @@ export default function UserProfile() {
                         <List
                             dataSource={addresses}
                             renderItem={item => (
-                                <List.Item
-                                    // actions={[
-                                    //     <Button
-                                    //         type="link"
-                                    //         icon={<DeleteOutlined />}
-                                    //         // onClick={() => handleDeleteAddress(item.id)}
-                                    //         danger
-                                    //     >
-                                    //         删除
-                                    //     </Button>
-                                    // ]}
-                                >
+                                <List.Item>
                                     <List.Item.Meta
                                         title={item.receiver}
                                         description={
@@ -287,10 +310,36 @@ export default function UserProfile() {
                                             </>
                                         }
                                     />
-                               </List.Item>
+                                </List.Item>
                             )}
                         />
                     )}
+                </Card>
+
+                <Card title="购书统计" style={{ width: "400px" }}>
+                    <Space direction="vertical" style={{ width: "100%" }}>
+                        <RangePicker
+                            showTime
+                            onChange={dates => setDateRange(dates ? [dates[0], dates[1]] : [])}
+                        />
+                        <Button type="primary" onClick={fetchStatistics} loading={loading}>
+                            查询统计
+                        </Button>
+                        {statistics && (
+                            <>
+                                <Table
+                                    columns={columns}
+                                    dataSource={Object.entries(statistics.bookPurchaseCounts).map(([title, count]) => ({
+                                        bookTitle: title,
+                                        quantity: count
+                                    }))}
+                                    pagination={false}
+                                />
+                                <p>总购买书籍数量: {statistics.totalBooks}</p>
+                                <p>总金额: {statistics.totalAmount.toFixed(2)} 元</p>
+                            </>
+                        )}
+                    </Space>
                 </Card>
             </Space>
         </Card>

@@ -8,7 +8,12 @@ import OrderPage from "../page/order";
 // import RankPage from "../page/rank";
 // import ApiPage from "../page/api";
 import ProfilePage from "../page/profile";
-import AdministratorPage from "../page/administrator";
+import AdminBookPage from "../page/adminbook";
+import AdminOrderPage from "../page/adminorder";
+import AdminUserPage from "../page/adminuser";
+import Register from "../page/register";
+import Statistics from "../page/statistics";
+import StatisticsPage from "../page/statistics";
 // import OtherUserProfilePage from "../page/other_profile";
 // import CoursePage from "../page/course";
 
@@ -22,7 +27,11 @@ export default function AppRouter() {
                  <Route path="/cart" element={<CartPage />} />
                  <Route path="/order" element={<OrderPage />} />
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/admin" element={<AdministratorPage />} />
+                <Route path="/adminbook" element={<AdminBookPage />} />
+                <Route path="/adminorder" element={<AdminOrderPage />} />
+                <Route path="/adminuser" element={<AdminUserPage />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/statistics" element={<StatisticsPage />} />
                 {/* <Route path="/rank" element={<RankPage />} /> */}
                 {/* <Route path="/course" element={<CoursePage />} /> */}
                  <Route path="/profile" element={<ProfilePage />} />
