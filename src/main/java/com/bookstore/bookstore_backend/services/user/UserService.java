@@ -1,17 +1,17 @@
 package com.bookstore.bookstore_backend.services.user;
 
-import com.bookstore.bookstore_backend.model.User.CommonAddress;
-import com.bookstore.bookstore_backend.model.User.LoginResponseDTO;
-import com.bookstore.bookstore_backend.model.User.User;
-import com.bookstore.bookstore_backend.model.User.UserAuth;
-import com.bookstore.bookstore_backend.model.User.UserDTO;
+import com.bookstore.bookstore_backend.model.User.*;
 import com.bookstore.bookstore_backend.repository.CommonAddressRepository;
 import com.bookstore.bookstore_backend.repository.UserAuthRepository;
 import com.bookstore.bookstore_backend.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.bookstore.bookstore_backend.repository.UserConsumptionProjection;
 
 import java.util.List;
 
@@ -36,15 +36,14 @@ public class UserService implements IUserService {
         }
 
         User user = new User();
-        BeanUtils.copyProperties(userDTO, user, "password"); // 排除 password 字段
-//        user = userRepository.save(user); // 确保持久化
+        BeanUtils.copyProperties(userDTO, user, "password");
 
         UserAuth userAuth = new UserAuth();
-        userAuth.setPassword(userDTO.getPassword()); // 密码加密
+        userAuth.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         userAuth.setUser(user);
-        user.setUserAuth(userAuth); // 级联管理 userAuth
+        user.setUserAuth(userAuth);
 
-        return userRepository.save(user); // 级联保存 userAuth，无需单独调用 userAuthRepository.save(userAuth);
+        return userRepository.save(user);
     }
 
     @Override
@@ -62,13 +61,13 @@ public class UserService implements IUserService {
     @Override
     public User updateUser(UserDTO userDTO) {
         User user = getUserById(userDTO.getId());
-        BeanUtils.copyProperties(userDTO, user, "password"); // 排除 password 字段
+        BeanUtils.copyProperties(userDTO, user, "password");
         return userRepository.save(user);
     }
 
     @Override
     public void deleteUser(Long id) {
-        userRepository.deleteById(id); // 由于 cascade = CascadeType.ALL，UserAuth 会自动删除
+        userRepository.deleteById(id);
     }
 
     @Override
@@ -80,7 +79,7 @@ public class UserService implements IUserService {
             user.setUserAuth(userAuth);
             userAuth.setUser(user);
         }
-        userAuth.setPassword(newPassword); // 密码会在 setter 中加密
+        userAuth.setPassword(passwordEncoder.encode(newPassword));
         user.setUserAuth(userAuth);
         return userRepository.save(user);
     }
@@ -127,6 +126,10 @@ public class UserService implements IUserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("用户名或密码错误"));
 
+        if (user.isDisabled()) {
+            throw new IllegalArgumentException("用户已被禁用，无法登录");
+        }
+
         UserAuth userAuth = user.getUserAuth();
         if (userAuth == null || !passwordEncoder.matches(password, userAuth.getPassword())) {
             throw new IllegalArgumentException("用户名或密码错误");
@@ -143,5 +146,32 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new IllegalArgumentException("地址id错误"));
         user.getCommonAddresses().remove(address);
         userRepository.save(user);
+    }
+
+    @Override
+    public User disableUser(Long userId) {
+        User user = getUserById(userId);
+        if (user.getRole() == Role.ADMIN) {
+            throw new IllegalArgumentException("不能禁用管理员用户");
+        }
+        user.setDisabled(true);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User enableUser(Long userId) {
+        User user = getUserById(userId);
+        user.setDisabled(false);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public List<UserConsumptionProjection> getUsersConsumptionRanking() {
+        return userRepository.findUserConsumptionRanking();
     }
 }

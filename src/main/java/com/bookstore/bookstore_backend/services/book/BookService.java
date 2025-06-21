@@ -116,4 +116,9 @@ public class BookService implements IBookService {
         BeanUtils.copyProperties(bookDTO, existingBook, "id", "comments");
         return bookRepository.save(existingBook);
     }
+
+    @Override
+    public List<Book> getBooksOrderBySalesDesc() {
+        return bookRepository.findBooksOrderBySalesDesc();
+    }
 }

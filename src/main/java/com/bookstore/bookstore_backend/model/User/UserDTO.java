@@ -17,6 +17,7 @@ public class UserDTO {
     private String avatar;
     private String tagLine;
     private Role role = Role.USER;
+    private boolean disabled = false;
 
     public Role getRole() {
         return role;

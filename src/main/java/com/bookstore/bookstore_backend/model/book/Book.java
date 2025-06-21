@@ -31,6 +31,20 @@ public class Book {
     @Column(nullable = false)
     private boolean deleted = false; // 新增删除标记字段，默认为false
 
+    @Column(nullable = false)
+    private int inventory = 100; // 新增库存字段，默认值为100
+
+    @Column(nullable = false)
+    private int sales = 0;
+
+    public int getSales() {
+        return sales;
+    }
+
+    public void setSales(int sales) {
+        this.sales = sales;
+    }
+
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments; // 书籍评论
 
@@ -108,6 +122,14 @@ public class Book {
         this.deleted = deleted;
     }
 
+    public int getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(int inventory) {
+        this.inventory = inventory;
+    }
+
     @Override
     public String toString() {
         return "Book{" +
@@ -119,6 +141,7 @@ public class Book {
                 ", price=" + price +
                 ", description='" + description + '\'' +
                 ", deleted=" + deleted +
+                ", inventory=" + inventory +
                 ", comments=" + comments +
                 '}';
     }

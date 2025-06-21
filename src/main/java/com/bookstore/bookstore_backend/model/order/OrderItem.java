@@ -29,7 +29,6 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnore
     private User user; // 关联用户
 
     @Column(name = "user_id", insertable = false, updatable = false)

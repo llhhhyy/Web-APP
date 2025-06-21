@@ -10,6 +10,24 @@ public class BookDTO {
     private String cover;
     private String price;
     private String description;
+    private int inventory;
+    private int sales;
+
+    public int getSales() {
+        return sales;
+    }
+
+    public void setSales(int sales) {
+        this.sales = sales;
+    }
+
+    public int getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(int inventory) {
+        this.inventory = inventory;
+    }
 
     // Getters and Setters
     public Long getId() {

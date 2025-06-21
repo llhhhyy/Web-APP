@@ -23,4 +23,5 @@ public interface IBookService {
     List<Comment> getCommentsByBookId(Long bookId);
     Set<String> getAllTags();
     Book updateBook(Long id, BookDTO bookDTO);
+    List<Book> getBooksOrderBySalesDesc();
 }

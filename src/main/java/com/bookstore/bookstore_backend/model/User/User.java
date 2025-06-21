@@ -2,6 +2,7 @@ package com.bookstore.bookstore_backend.model.User;
 
 import com.bookstore.bookstore_backend.model.cart.CartItem;
 import com.bookstore.bookstore_backend.model.order.OrderItem;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,17 +30,23 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    @Column(nullable = false)
+    private boolean disabled = false;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommonAddress> commonAddresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<CartItem> cartItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_auth_id", referencedColumnName = "id", nullable = false, unique = true)
+    @JsonIgnore
     private UserAuth userAuth;
 
     // Getters and Setters
@@ -99,6 +106,14 @@ public class User {
         this.balance = balance;
     }
 
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
     public List<CommonAddress> getCommonAddresses() {
         return commonAddresses;
     }
@@ -149,6 +164,7 @@ public class User {
                 ", tagLine='" + tagLine + '\'' +
                 ", balance=" + balance +
                 ", role=" + role +
+                ", disabled=" + disabled +
                 ", commonAddresses=" + commonAddresses +
                 '}';
     }

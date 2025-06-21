@@ -31,4 +31,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query("SELECT b FROM Book b WHERE b.deleted = false")
     List<Book> findAllByDeletedFalse();
+
+    @Query("SELECT b FROM Book b WHERE b.deleted = false ORDER BY b.sales DESC")
+    List<Book> findBooksOrderBySalesDesc();
 }

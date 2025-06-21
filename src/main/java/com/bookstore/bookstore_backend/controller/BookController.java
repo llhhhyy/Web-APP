@@ -72,4 +72,10 @@ public class BookController {
         bookService.deleteBook(id);
         return ResponseMessage.success(null);
     }
+
+    @GetMapping("/salesRank")
+    public ResponseMessage<List<Book>> getBooksSalesRank() {
+        List<Book> books = bookService.getBooksOrderBySalesDesc();
+        return ResponseMessage.success(books);
+    }
 }

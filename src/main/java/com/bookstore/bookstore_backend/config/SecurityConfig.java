@@ -41,6 +41,7 @@ public class SecurityConfig {
                     .withUsername(user.getUsername())
                     .password(user.getUserAuth().getPassword())
                     .roles(user.getRole().name())
+                    .disabled(user.isDisabled()) // 考虑用户的禁用状态
                     .build();
         };
     }
@@ -48,13 +49,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors // 启用 CORS
+                .cors(cors -> cors
                         .configurationSource(request -> {
                             CorsConfiguration config = new CorsConfiguration();
-                            config.setAllowedOrigins(List.of("http://localhost:3000")); // 允许的前端源
-                            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 允许的 HTTP 方法
-                            config.setAllowedHeaders(List.of("*")); // 允许所有请求头
-                            config.setAllowCredentials(true); // 允许发送 cookie
+                            config.setAllowedOrigins(List.of("http://localhost:3000"));
+                            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                            config.setAllowedHeaders(List.of("*"));
+                            config.setAllowCredentials(true);
                             return config;
                         }))
                 .authorizeHttpRequests(auth -> auth
