@@ -74,6 +74,7 @@ export default function BookComment({ comment, isReplying, onReply, onMutate }) 
             const response = await axios.put(`${BASEURL}/comments/${comment.id}/unlike`, {
                 userId: user.id,
             });
+
             if (response.data.code === 200) {
                 message.success("取消点赞成功");
                 onMutate({

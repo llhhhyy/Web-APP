@@ -70,6 +70,8 @@ export default function BookDetails({ book }) {
                                 <Divider type="vertical" />
                                 {`销量：${book.sales || 0}`}
                                 <Divider type="vertical" />
+                                {`库存：${book.inventory || 0}`}
+                                <Divider type="vertical" />
                                 标签：
                                 {book.tags.map((t) => (
                                     <Tag key={t}>{t}</Tag>

@@ -1,17 +1,18 @@
-import { Button, Dropdown, Form, Layout, Menu, Modal, Space, Input } from "antd";
-import { Content, Footer, Header } from "antd/es/layout/layout";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect, useContext } from "react";
-import { UserContext } from "../lib/context";
-import { siderMenuItems } from "./layout_Items";
-import { UserOutlined } from "@ant-design/icons";
-import { BASEURL } from "../service/common";
+import {Button, Dropdown, Form, Layout, Menu, Modal, Space, Input} from "antd";
+import {Content, Footer, Header} from "antd/es/layout/layout";
+import {Link, useLocation, useNavigate} from "react-router-dom";
+import {useState, useEffect, useContext} from "react";
+import {UserContext} from "../lib/context";
+import {siderMenuItems} from "./layout_Items";
+import {UserOutlined} from "@ant-design/icons";
+import {BASEURL} from "../service/common";
+import {logout} from "../service/user"
 import "../css/layout.css";
 import icon from "../image/icon.png";
 import axios from "axios";
 import useMessage from "antd/es/message/useMessage";
 
-export function BasicLayout({ children }) {
+export function BasicLayout({children}) {
     return (
         <Layout className="basic-layout">
             <Content>{children}</Content>
@@ -27,10 +28,10 @@ export function BasicLayout({ children }) {
     );
 }
 
-const { Sider } = Layout;
+const {Sider} = Layout;
 
-export function PrivateLayout({ children }) {
-    const { user, setUser } = useContext(UserContext);
+export function PrivateLayout({children}) {
+    const {user, setUser} = useContext(UserContext);
     const [messageApi, contextHolder] = useMessage();
     const location = useLocation();
     const navigate = useNavigate();
@@ -43,7 +44,7 @@ export function PrivateLayout({ children }) {
             const userId = localStorage.getItem("userId");
             if (!userId) {
                 setLoading(false);
-                navigate("/login", { replace: true });
+                navigate("/login", {replace: true});
                 return;
             }
 
@@ -69,7 +70,7 @@ export function PrivateLayout({ children }) {
                 localStorage.removeItem("userId");
                 localStorage.removeItem("username");
                 setUser(null);
-                navigate("/login", { replace: true });
+                navigate("/login", {replace: true});
             } finally {
                 setLoading(false);
             }
@@ -107,13 +108,27 @@ export function PrivateLayout({ children }) {
         }
     };
 
-    const handleDropMenuClick = (e) => {
+    const handleDropMenuClick = async (e) => {
         if (e.key === "/logout") {
-            localStorage.removeItem("userId");
-            localStorage.removeItem("username");
-            setUser(null);
-            navigate("/login");
-            messageApi.success("已登出");
+            try {
+                // Call the logout API first
+                await logout();
+
+                // Clean up local state regardless of API response
+                localStorage.removeItem("userId");
+                localStorage.removeItem("username");
+                setUser(null);
+                navigate("/login");
+                messageApi.success("已登出");
+            } catch (error) {
+                // Even if logout API fails, still clean up local state
+                console.error("登出失败:", error);
+                localStorage.removeItem("userId");
+                localStorage.removeItem("username");
+                setUser(null);
+                navigate("/login");
+                messageApi.success("已登出");
+            }
         } else if (e.key === "password") {
             setShowPasswordModal(true);
         }
@@ -122,17 +137,17 @@ export function PrivateLayout({ children }) {
     // 动态过滤菜单，仅在 role 为 ADMIN 时包含 /administrator
     const filteredMenuItems = siderMenuItems.filter(
         (item) =>
-            !['/adminbook', '/adminorder', '/adminuser','/statistics'].includes(item.key) ||
+            !['/adminbook', '/adminorder', '/adminuser', '/statistics'].includes(item.key) ||
             user?.role === "ADMIN"
     );
 
     const selectedKey = filteredMenuItems.find((item) => item.key === location.pathname)?.key || "/";
 
     const dynamicDropMenuItems = [
-        { key: "nickname", label: user?.username || "user", icon: <UserOutlined /> },
-        { key: "password", label: "修改密码", icon: <UserOutlined /> },
-        { key: "balance", label: `余额：${user?.balance || 0} 元`, icon: <UserOutlined /> },
-        { key: "/logout", label: "登出", icon: <UserOutlined />, danger: true },
+        {key: "nickname", label: user?.username || "user", icon: <UserOutlined/>},
+        {key: "password", label: "修改密码", icon: <UserOutlined/>},
+        {key: "balance", label: `余额：${user?.balance || 0} 元`, icon: <UserOutlined/>},
+        {key: "/logout", label: "登出", icon: <UserOutlined/>, danger: true},
     ];
 
     if (loading || !user) {
@@ -156,27 +171,27 @@ export function PrivateLayout({ children }) {
                     <Form.Item
                         name="oldPassword"
                         label="旧密码"
-                        rules={[{ required: true, message: "请输入旧密码" }]}
+                        rules={[{required: true, message: "请输入旧密码"}]}
                     >
-                        <Input.Password placeholder="请输入当前密码" />
+                        <Input.Password placeholder="请输入当前密码"/>
                     </Form.Item>
                     <Form.Item
                         name="newPassword"
                         label="新密码"
                         rules={[
-                            { required: true, message: "请输入新密码" },
-                            { min: 6, message: "密码至少6位" },
+                            {required: true, message: "请输入新密码"},
+                            {min: 6, message: "密码至少6位"},
                         ]}
                     >
-                        <Input.Password placeholder="至少6位字符" />
+                        <Input.Password placeholder="至少6位字符"/>
                     </Form.Item>
                     <Form.Item
                         name="confirmPassword"
                         label="确认新密码"
                         dependencies={["newPassword"]}
                         rules={[
-                            { required: true, message: "请确认新密码" },
-                            ({ getFieldValue }) => ({
+                            {required: true, message: "请确认新密码"},
+                            ({getFieldValue}) => ({
                                 validator(_, value) {
                                     if (!value || getFieldValue("newPassword") === value) {
                                         return Promise.resolve();
@@ -186,7 +201,7 @@ export function PrivateLayout({ children }) {
                             }),
                         ]}
                     >
-                        <Input.Password placeholder="再次输入新密码" />
+                        <Input.Password placeholder="再次输入新密码"/>
                     </Form.Item>
                 </Form>
             </Modal>
@@ -202,7 +217,7 @@ export function PrivateLayout({ children }) {
                     >
                         <Button
                             shape="circle"
-                            icon={<UserOutlined />}
+                            icon={<UserOutlined/>}
                             size="large"
                             className="user-button"
                         />
@@ -225,14 +240,14 @@ export function PrivateLayout({ children }) {
                 <Header className="header">
                     <Link to="/home">
                         <h1>
-                            <img src={icon} alt="Book Store Icon" className="header-icon" />
+                            <img src={icon} alt="Book Store Icon" className="header-icon"/>
                             BOOK STORE
                         </h1>
                     </Link>
                 </Header>
 
                 <Content className="content">
-                    <UserContext.Provider value={{ user, setUser }}>
+                    <UserContext.Provider value={{user, setUser}}>
                         {children}
                     </UserContext.Provider>
                 </Content>

@@ -40,7 +40,7 @@ export async function post(url, data) {
     return res.json();
 }
 
-export const BASEURL = 'http://localhost:8080';
+export const BASEURL = 'http://localhost:8082';
 export const DUMMY_RESPONSE = {
     ok: false,
     message: "网络错误！"

@@ -17,11 +17,14 @@ const LoginPage = () => {
     const { user, setUser } = useContext(UserContext); // 获取上下文中的 setUser
 
     const onSubmit = async (values) => {
+        console.log(values.username);
+        console.log(values.password);
         try {
-            const response = await axios.post(`${BASEURL}/users/login`, {
+            const response = await axios.post(`${BASEURL}/logins/login`, {
                 username: values.username,
                 password: values.password
             });
+
 
             if (response.status === 200) {
                 const { userId, username } = response.data.data;

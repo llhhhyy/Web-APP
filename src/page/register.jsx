@@ -23,7 +23,8 @@ const RegisterPage = () => {
             return Promise.reject('请输入用户名');
         }
         try {
-            const response = await axios.get(`${BASEURL}/users/username/${value}`);
+            const response = await axios.get(`${BASEURL}/users/username/${value}/exists`);
+            console.log(response.data);
             if (response.data.data) {
                 return Promise.reject('该用户名已被使用');
             }
@@ -47,6 +48,8 @@ const RegisterPage = () => {
 
     // 提交注册表单
     const onSubmit = async (values) => {
+        console.log(values.username);
+        console.log(values.password);
         try {
             const response = await axios.post(`${BASEURL}/users/register`, {
                 username: values.username,
