@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/logins")
-//@Scope("singleton")
+@Scope("singleton")
 public class LoginController {
     @Autowired
     private AuthenticationManager authenticationManager;
