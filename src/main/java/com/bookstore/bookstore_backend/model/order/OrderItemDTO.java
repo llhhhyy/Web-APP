@@ -6,17 +6,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
 public class OrderItemDTO {
     private Long id;
 
     private Long bookId;
 
     private int number=1; // 购物车中的数量
-
-    private Long userId;
 
     @NotBlank(message = "收货人不能为空")
     private String recipient;
@@ -53,14 +53,6 @@ public class OrderItemDTO {
         this.number = number;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
     public String getRecipient() {
         return recipient;
     }
@@ -91,7 +83,6 @@ public class OrderItemDTO {
                 "id=" + id +
                 ", bookId=" + bookId +
                 ", number=" + number +
-                ", userId=" + userId +
                 ", recipient='" + recipient + '\'' +
                 ", phone='" + phone + '\'' +
                 ", address='" + address + '\'' +

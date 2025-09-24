@@ -4,6 +4,7 @@ import com.bookstore.bookstore_backend.model.ResponseMessage;
 import com.bookstore.bookstore_backend.model.User.User;
 import com.bookstore.bookstore_backend.model.order.OrderItem;
 import com.bookstore.bookstore_backend.model.order.OrderItemDTO;
+import com.bookstore.bookstore_backend.model.order.OrderMessage;
 import com.bookstore.bookstore_backend.model.order.OrderStatisticsDTO;
 import com.bookstore.bookstore_backend.repository.UserRepository;
 import com.bookstore.bookstore_backend.services.IOrderService;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +27,9 @@ public class OrderController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private KafkaTemplate<String, OrderMessage> kafkaTemplate;
 
     @GetMapping("/get")
     public ResponseMessage<List<OrderItem>> getUserOrder() {
@@ -39,7 +44,7 @@ public class OrderController {
     }
 
     @PostMapping("/add")
-    public ResponseMessage<OrderItem> addBookToOrder(@RequestBody OrderItemDTO orderItemDTO) {
+    public ResponseMessage<String> addBookToOrder(@RequestBody OrderItemDTO orderItemDTO) {
         try {
             // 从安全上下文获取当前用户名
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -48,11 +53,16 @@ public class OrderController {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
 
-            // 覆盖DTO中的用户ID
-            orderItemDTO.setUserId(user.getId());
+            System.out.println("Received order request from user: " + user.getId() + " for book: " + orderItemDTO.getBookId() + " with quantity: " + orderItemDTO.getNumber());
+            // 组装消息
+            OrderMessage orderMessage = new OrderMessage(user.getId(), orderItemDTO);
 
-            OrderItem orderItem = orderService.addBookToOrder(user.getId(), orderItemDTO);
-            return ResponseMessage.success(orderItem);
+            // 发送到Kafka
+            kafkaTemplate.send("order_topic", orderMessage);  // 发送到order_topic
+
+            System.out.println("Order message sent to Kafka: " + orderMessage);
+
+            return ResponseMessage.success("订单已提交，正在异步处理");  // 返回给前端，告知异步处理
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
