@@ -84,6 +84,10 @@ public class LoginController {
         }
         request.getSession().invalidate(); // 清除会话
         SecurityContextHolder.clearContext(); // 清除 Spring Security 上下文
+        if(sessionDuration==0){
+            return ResponseMessage.error("登出失败");
+        }
         return ResponseMessage.success("登出成功，会话持续时间: " + sessionDuration + " 秒");
+
     }
 }

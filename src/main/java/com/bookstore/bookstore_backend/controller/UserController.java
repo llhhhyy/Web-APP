@@ -89,23 +89,17 @@ public class UserController {
         return ResponseMessage.success("登出成功，会话持续时间: " + sessionDuration + " 秒");
     }
 
-    @PostMapping("/test/stopTimer" )
-    public ResponseMessage testStopTimer() {
-        System.out.println("Attempting to stop timer.");
-        long sessionDuration;
-        try {
-            sessionDuration = sessionTimerService.stopTimer();
-            System.out.println("Session duration: " + sessionDuration + " seconds");
-        } catch (IllegalStateException e) {
-            logger.warn("Stop timer without active timer: {}", e.getMessage());
-            sessionDuration = 0;
-        }
-        return ResponseMessage.success("计时停止，持续时间: " + sessionDuration + " 秒");
-    }
     @GetMapping("/username/{username}")
     public ResponseMessage<User> getUserByUsername(@PathVariable String username) {
         User user = userService.getUserByUsername(username);
         return ResponseMessage.success(user);
+    }
+
+    @GetMapping("/username/{username}/exists")
+    public ResponseMessage<Boolean> checkUsernameExists(@PathVariable String username) {
+        User user = userService.getUserByUsername(username);
+        boolean exists = (user != null);
+        return ResponseMessage.success(exists);
     }
 
     @GetMapping("/id/{id}")

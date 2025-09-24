@@ -59,7 +59,7 @@ public class SecurityConfig {
                             return config;
                         }))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/register", "/users/login","/logins/register","/logins/login").permitAll()
+                        .requestMatchers("/users/register", "/users/login","/logins/register","/logins/login","/users/username/{username}/exists").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
