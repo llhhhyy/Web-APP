@@ -4,6 +4,7 @@ import com.bookstore.bookstore_backend.model.ResponseMessage;
 import com.bookstore.bookstore_backend.model.User.*;
 import com.bookstore.bookstore_backend.repository.UserConsumptionProjection;
 import com.bookstore.bookstore_backend.services.IUserService;
+import com.bookstore.bookstore_backend.services.Impl.SessionTimerService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,10 @@ public class UserController {
 
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private SessionTimerService sessionTimerService;  // 新增注入
+
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @PostMapping("/register")
@@ -58,6 +63,9 @@ public class UserController {
             // 将认证信息存储到会话
             request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 
+            // 新增：开始计时
+            sessionTimerService.startTimer();
+
             return ResponseEntity.ok(ResponseMessage.success(response));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -67,11 +75,33 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseMessage logout(HttpServletRequest request) {
+        System.out.println("Attempting to stop timer and logout.");
+        long sessionDuration=1;
+        try {
+            sessionDuration = sessionTimerService.stopTimer();
+            System.out.println("Session duration: " + sessionDuration + " seconds");
+        } catch (IllegalStateException e) {
+            logger.warn("Stop timer without active timer: {}", e.getMessage());
+            sessionDuration = 0;
+        }
         request.getSession().invalidate(); // 清除会话
         SecurityContextHolder.clearContext(); // 清除 Spring Security 上下文
-        return ResponseMessage.success("登出成功");
+        return ResponseMessage.success("登出成功，会话持续时间: " + sessionDuration + " 秒");
     }
 
+    @PostMapping("/test/stopTimer" )
+    public ResponseMessage testStopTimer() {
+        System.out.println("Attempting to stop timer.");
+        long sessionDuration;
+        try {
+            sessionDuration = sessionTimerService.stopTimer();
+            System.out.println("Session duration: " + sessionDuration + " seconds");
+        } catch (IllegalStateException e) {
+            logger.warn("Stop timer without active timer: {}", e.getMessage());
+            sessionDuration = 0;
+        }
+        return ResponseMessage.success("计时停止，持续时间: " + sessionDuration + " 秒");
+    }
     @GetMapping("/username/{username}")
     public ResponseMessage<User> getUserByUsername(@PathVariable String username) {
         User user = userService.getUserByUsername(username);

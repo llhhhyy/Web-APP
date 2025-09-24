@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/logins")
-@Scope("singleton")
+//@Scope("singleton")
 public class LoginController {
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -73,12 +73,17 @@ public class LoginController {
 
     @PostMapping("/logout")
     public ResponseMessage logout(HttpServletRequest request) {
-        long sessionDuration = sessionTimerService.stopTimer();
-
+        System.out.println("Attempting to stop timer and logout.");
+        long sessionDuration=1;
+        try {
+            sessionDuration = sessionTimerService.stopTimer();
+            System.out.println("Session duration: " + sessionDuration + " seconds");
+        } catch (IllegalStateException e) {
+            logger.warn("Stop timer without active timer: {}", e.getMessage());
+            sessionDuration = 0;
+        }
         request.getSession().invalidate(); // 清除会话
         SecurityContextHolder.clearContext(); // 清除 Spring Security 上下文
-
-        // 修改响应：返回登出成功 + 会话时间
         return ResponseMessage.success("登出成功，会话持续时间: " + sessionDuration + " 秒");
     }
 }
