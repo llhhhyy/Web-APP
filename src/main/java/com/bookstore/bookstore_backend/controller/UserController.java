@@ -3,7 +3,7 @@ package com.bookstore.bookstore_backend.controller;
 import com.bookstore.bookstore_backend.model.ResponseMessage;
 import com.bookstore.bookstore_backend.model.User.*;
 import com.bookstore.bookstore_backend.repository.UserConsumptionProjection;
-import com.bookstore.bookstore_backend.services.user.IUserService;
+import com.bookstore.bookstore_backend.services.IUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

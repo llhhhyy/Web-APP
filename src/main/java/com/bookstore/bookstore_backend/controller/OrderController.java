@@ -6,7 +6,7 @@ import com.bookstore.bookstore_backend.model.order.OrderItem;
 import com.bookstore.bookstore_backend.model.order.OrderItemDTO;
 import com.bookstore.bookstore_backend.model.order.OrderStatisticsDTO;
 import com.bookstore.bookstore_backend.repository.UserRepository;
-import com.bookstore.bookstore_backend.services.order.IOrderService;
+import com.bookstore.bookstore_backend.services.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

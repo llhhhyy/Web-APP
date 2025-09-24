@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: community-service
+  profiles:
+    active: dev  # 默认激活开发环境
+  datasource:
+    url: jdbc:mysql://localhost:3306/bookstore?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: lhylhylhy050802
+    hikari:  # 配置 HikariCP 连接池
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 30000
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  redis:
+    host: localhost
+    port: 6379
+    password: your_redis_password  # 替换为实际密码，若无密码可留空
+    database: 0
+    timeout: 10000
+  data:
+    redis:
+      repositories:
+        enabled: true
+server:
+  port: 8082
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000  # Feign 连接超时（毫秒）
+        readTimeout: 5000     # Feign 读取超时（毫秒）
+        loggerLevel: basic    # Feign 日志级别（可选：none, basic, headers, full）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics  # 暴露 Actuator 端点
+logging:
+  level:
+    root: INFO
+    com.example.community: DEBUG  # CommunityService 包下的日志级别

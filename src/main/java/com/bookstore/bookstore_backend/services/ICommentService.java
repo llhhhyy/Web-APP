@@ -1,4 +1,4 @@
-package com.bookstore.bookstore_backend.services.comment;
+package com.bookstore.bookstore_backend.services;
 
 import com.bookstore.bookstore_backend.model.comment.Comment;
 import com.bookstore.bookstore_backend.model.comment.CommentReply;

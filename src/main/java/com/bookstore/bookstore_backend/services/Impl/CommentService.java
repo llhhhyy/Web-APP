@@ -1,7 +1,6 @@
-package com.bookstore.bookstore_backend.services.comment;
+package com.bookstore.bookstore_backend.services.Impl;
 
 import com.bookstore.bookstore_backend.model.comment.Comment;
-import com.bookstore.bookstore_backend.model.comment.CommentDTO;
 import com.bookstore.bookstore_backend.model.comment.CommentLike;
 import com.bookstore.bookstore_backend.model.comment.CommentReply;
 import com.bookstore.bookstore_backend.model.comment.CommentReplyDTO;
@@ -9,6 +8,7 @@ import com.bookstore.bookstore_backend.repository.CommentLikeRepository;
 import com.bookstore.bookstore_backend.repository.CommentReplyRepository;
 import com.bookstore.bookstore_backend.repository.CommentRepository;
 import com.bookstore.bookstore_backend.repository.CommonAddressRepository;
+import com.bookstore.bookstore_backend.services.ICommentService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

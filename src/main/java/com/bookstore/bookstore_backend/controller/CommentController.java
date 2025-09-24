@@ -4,7 +4,7 @@ import com.bookstore.bookstore_backend.model.ResponseMessage;
 import com.bookstore.bookstore_backend.model.comment.Comment;
 import com.bookstore.bookstore_backend.model.comment.CommentReply;
 import com.bookstore.bookstore_backend.model.comment.CommentReplyDTO;
-import com.bookstore.bookstore_backend.services.comment.ICommentService;
+import com.bookstore.bookstore_backend.services.ICommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

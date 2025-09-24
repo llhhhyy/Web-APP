@@ -1,4 +1,4 @@
-package com.bookstore.bookstore_backend.services.cart;
+package com.bookstore.bookstore_backend.services;
 
 import com.bookstore.bookstore_backend.model.cart.CartItem;
 

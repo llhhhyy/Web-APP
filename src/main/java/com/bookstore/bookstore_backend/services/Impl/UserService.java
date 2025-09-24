@@ -1,14 +1,12 @@
-package com.bookstore.bookstore_backend.services.user;
+package com.bookstore.bookstore_backend.services.Impl;
 
 import com.bookstore.bookstore_backend.model.User.*;
 import com.bookstore.bookstore_backend.repository.CommonAddressRepository;
 import com.bookstore.bookstore_backend.repository.UserAuthRepository;
 import com.bookstore.bookstore_backend.repository.UserRepository;
+import com.bookstore.bookstore_backend.services.IUserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.bookstore.bookstore_backend.repository.UserConsumptionProjection;
@@ -40,6 +38,7 @@ public class UserService implements IUserService {
 
         UserAuth userAuth = new UserAuth();
         userAuth.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        System.out.println("Encoded password: " + userAuth.getPassword());
         userAuth.setUser(user);
         user.setUserAuth(userAuth);
 
@@ -123,16 +122,20 @@ public class UserService implements IUserService {
 
     @Override
     public LoginResponseDTO login(String username, String password) {
+        System.out.println("Attempting login for username: " + username);
+        System.out.println("Raw password: " + password);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("用户名或密码错误"));
+                .orElseThrow(() -> new IllegalArgumentException("用户名错误->用户名或密码错误"));
 
         if (user.isDisabled()) {
             throw new IllegalArgumentException("用户已被禁用，无法登录");
         }
 
         UserAuth userAuth = user.getUserAuth();
+        System.out.println("Stored hashed password: " + (userAuth != null ? userAuth.getPassword() : "null"));
+        System.out.println("Raw password: " + passwordEncoder.encode(password));
         if (userAuth == null || !passwordEncoder.matches(password, userAuth.getPassword())) {
-            throw new IllegalArgumentException("用户名或密码错误");
+            throw new IllegalArgumentException("密码错误->用户名或密码错误");
         }
 
         return new LoginResponseDTO(user);

@@ -1,4 +1,4 @@
-package com.bookstore.bookstore_backend.services.book;
+package com.bookstore.bookstore_backend.services;
 
 import com.bookstore.bookstore_backend.model.book.Book;
 import com.bookstore.bookstore_backend.model.book.BookDTO;

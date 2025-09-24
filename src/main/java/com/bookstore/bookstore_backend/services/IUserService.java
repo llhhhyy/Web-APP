@@ -1,4 +1,4 @@
-package com.bookstore.bookstore_backend.services.user;
+package com.bookstore.bookstore_backend.services;
 
 import com.bookstore.bookstore_backend.model.User.*;
 import com.bookstore.bookstore_backend.repository.UserConsumptionProjection;

@@ -1,4 +1,4 @@
-package com.bookstore.bookstore_backend.services.book;
+package com.bookstore.bookstore_backend.services.Impl;
 
 import com.bookstore.bookstore_backend.model.book.Book;
 import com.bookstore.bookstore_backend.model.book.BookDTO;
@@ -6,6 +6,7 @@ import com.bookstore.bookstore_backend.model.comment.Comment;
 import com.bookstore.bookstore_backend.model.comment.CommentDTO;
 import com.bookstore.bookstore_backend.repository.BookRepository;
 import com.bookstore.bookstore_backend.repository.CommentRepository;
+import com.bookstore.bookstore_backend.services.IBookService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

@@ -1,4 +1,4 @@
-package com.bookstore.bookstore_backend.services.order;
+package com.bookstore.bookstore_backend.services;
 
 import com.bookstore.bookstore_backend.model.order.OrderItem;
 import com.bookstore.bookstore_backend.model.order.OrderItemDTO;

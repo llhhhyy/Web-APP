@@ -1,4 +1,4 @@
-package com.bookstore.bookstore_backend.services.cart;
+package com.bookstore.bookstore_backend.services.Impl;
 
 import com.bookstore.bookstore_backend.model.User.User;
 import com.bookstore.bookstore_backend.model.book.Book;
@@ -6,6 +6,7 @@ import com.bookstore.bookstore_backend.model.cart.CartItem;
 import com.bookstore.bookstore_backend.repository.BookRepository;
 import com.bookstore.bookstore_backend.repository.CartItemRepository;
 import com.bookstore.bookstore_backend.repository.UserRepository;
+import com.bookstore.bookstore_backend.services.ICartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
