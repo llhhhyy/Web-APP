@@ -70,16 +70,16 @@ export default function CartItemTable({ cartItems: initialCartItems = [], onMuta
 
     const computeTotalPrice = () => {
         const total = selectedItems.reduce((sum, item) => {
-            const price = parseFloat(item.book?.price) || 0; // 转为数字，处理无效价格
+            const price = parseFloat(item.book?.price) || 0;
             const number = item.number || 0;
             return sum + price * number;
         }, 0);
-        return total.toFixed(2); // 格式化为两位小数
+        return total.toFixed(2);
     };
 
     const computeItemPrice = (price, number) => {
-        const parsedPrice = parseFloat(price) || 0; // 转为数字，处理无效价格
-        return (parsedPrice * number).toFixed(2); // 格式化为两位小数
+        const parsedPrice = parseFloat(price) || 0;
+        return (parsedPrice * number).toFixed(2);
     };
 
     const handleSubmit = () => {
@@ -94,44 +94,31 @@ export default function CartItemTable({ cartItems: initialCartItems = [], onMuta
         setIsModalOpen(true);
     };
 
-    const handleOrderSubmit = async (values) => {
-        try {
-            // for (const item of selectedItems) {
-            //     const response = await axios.post(`${BASEURL}/order/add`, {
-            //         bookId: item.bookId,
-            //         number: item.number,
-            //         recipient: values.recipient,
-            //         phone: values.phone,
-            //         address: values.address,
-            //     });
-            //     if (response.data.code !== 200) {
-            //         messageApi.error(`订单提交失败（书籍ID：${item.bookId}）：` + response.data.message);
-            //         return;
-            //     }
-            // }
-
-            // 删除已提交的购物车项
-            for (const item of selectedItems) {
-                await axios.delete(`${BASEURL}/cart/delete/${item.id}`);
-            }
-
-            const remainingItems = items.filter(
-                item => !selectedItems.some(selected => selected.id === item.id)
-            );
-            setItems(remainingItems);
-            setSelectedItems([]);
-            onMutate(remainingItems);
-            messageApi.success("下单成功！");
-            setIsModalOpen(false);
-            navigate("/order");
-        } catch (error) {
-            messageApi.error("网络错误，请稍后重试");
-        }
-    };
-
     const handleCancel = () => {
         setIsModalOpen(false);
         form.resetFields();
+    };
+
+    const handleOrderSubmit = async () => {
+        setIsModalOpen(false);
+        form.resetFields();
+        // 清空已下单的购物车项
+        try {
+            for (const item of selectedItems) {
+                await axios.delete(`${BASEURL}/cart/delete/${item.id}`);
+            }
+            const updatedItems = items.filter(
+                item => !selectedItems.some(selected => selected.id === item.id)
+            );
+            setItems(updatedItems);
+            setSelectedItems([]);
+            onMutate(updatedItems);
+            messageApi.success("订单提交成功，购物车已更新");
+            // 可选：跳转到订单页
+            navigate("/order");
+        } catch (error) {
+            messageApi.error("清空购物车失败，请手动删除");
+        }
     };
 
     const columns = [

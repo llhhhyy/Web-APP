@@ -28,44 +28,37 @@ export default function OrderFormModal({
             return;
         }
         try {
+            let items = [];
             if (selectedItems && selectedItems.length > 0) {
-                console.log("选中的书籍:", selectedItems);
-                // Handle cart orders (multiple items)
-                for (const item of selectedItems) {
-                    const response = await axios.post(`${BASEURL}/order/add`, {
-                        bookId: item.bookId,
-                        number: item.number,
-                        recipient: values.recipient,
-                        phone: values.phone,
-                        address: values.address,
-                    });
-                    console.log(item.bookId);
-                    if (response.data.code !== 200) {
-                        message.error(`订单提交失败（书籍ID：${item.bookId}）：` + response.data.message);
-                        return;
-                    }
-                }
-                message.success("订单提交成功！");
+                // 从购物车：构建 items 列表
+                items = selectedItems.map((item) => ({
+                    bookId: item.bookId,
+                    number: item.number,
+                }));
             } else if (book) {
-                // Handle single book order (from book_details)
-                const response = await axios.post(`${BASEURL}/order/add`, {
-                    bookId: book.id,
-                    number: values.quantity,
-                    recipient: values.recipient,
-                    phone: values.phone,
-                    address: values.address,
-                });
-                if (response.data.code !== 200) {
-                    message.error(`订单提交失败（书籍ID：${book.id}）：` + response.data.message);
-                    return;
-                }
-                message.success(
-                    `订单提交成功！收货人：${values.recipient}，地址：${values.address}，数量：${values.quantity}`
-                );
-            } else {
+                // 从书籍详情：单个物品
+                items = [{ bookId: book.id, number: values.quantity }];
+            }
+
+            if (items.length === 0) {
                 message.error("没有可提交的订单项");
                 return;
             }
+
+            // 构建 OrderDTO，单一请求
+            const orderDTO = {
+                recipient: values.recipient,
+                phone: values.phone,
+                address: values.address,
+                items,
+            };
+
+            const response = await axios.post(`${BASEURL}/order/add`, orderDTO);
+            if (response.data.code !== 200) {
+                message.error("订单提交失败：" + response.data.message);
+                return;
+            }
+            message.success("订单提交成功！正在异步处理");
             onSubmit(values);
         } catch (error) {
             message.error("网络错误，请稍后重试");
@@ -73,13 +66,7 @@ export default function OrderFormModal({
     };
 
     return (
-        <Modal
-            title="填写订单信息"
-            open={visible}
-            onCancel={onCancel}
-            footer={null}
-            width={600}
-        >
+        <Modal title="填写订单信息" open={visible} onCancel={onCancel} footer={null} width={600}>
             <Form
                 form={form}
                 layout="vertical"
