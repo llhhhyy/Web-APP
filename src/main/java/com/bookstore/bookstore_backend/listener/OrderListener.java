@@ -1,6 +1,6 @@
 package com.bookstore.bookstore_backend.listener;
 
-import com.bookstore.bookstore_backend.model.order.OrderItem;
+import com.bookstore.bookstore_backend.model.order.Order;
 import com.bookstore.bookstore_backend.model.order.OrderMessage;
 import com.bookstore.bookstore_backend.services.IOrderService;
 import org.slf4j.Logger;
@@ -18,24 +18,21 @@ public class OrderListener {
     private IOrderService orderService;
 
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;  // 用于发送结果，简单用String
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @KafkaListener(topics = "order_topic", groupId = "order-group")
     public void handleOrderMessage(OrderMessage orderMessage) {
         try {
             System.out.println("收到下单消息: " + orderMessage + ", 开始处理订单...");
 
-            // 调用现有的OrderService处理订单（复用同步逻辑）
-            OrderItem orderItem = orderService.addBookToOrder(orderMessage.getUserId(), orderMessage.getOrderItemDTO());
+            Order order = orderService.createOrder(orderMessage.getUserId(), orderMessage.getOrderDTO());
 
-            // 处理成功，发送结果到另一个Topic（例如，发送订单ID作为结果）
-            String result = "订单处理成功，订单ID: " + orderItem.getId();
+            String result = "订单处理成功，订单ID: " + order.getId();
             kafkaTemplate.send("order_topic_result", result);
 
             System.out.println(result);
         } catch (Exception e) {
             System.out.println("订单处理失败: " + e.getMessage());
-            // 可以发送失败结果到另一个Topic，或重试逻辑（可选）
             kafkaTemplate.send("order_topic_result", "订单处理失败: " + e.getMessage());
         }
     }

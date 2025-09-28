@@ -9,14 +9,13 @@ import java.io.Serializable;
 
 @Setter
 @Getter
-@NoArgsConstructor  // 新增：生成无参构造函数
+@NoArgsConstructor
 public class OrderMessage implements Serializable {
     private Long userId;
-    private OrderItemDTO orderItemDTO;
+    private OrderDTO orderDTO;
 
-    // 原有构造函数（可选保留）
-    public OrderMessage(Long userId, OrderItemDTO orderItemDTO) {
+    public OrderMessage(Long userId, OrderDTO orderDTO) {
         this.userId = userId;
-        this.orderItemDTO = orderItemDTO;
+        this.orderDTO = orderDTO;
     }
 }

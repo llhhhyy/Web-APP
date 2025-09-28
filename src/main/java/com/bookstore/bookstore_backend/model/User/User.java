@@ -1,7 +1,7 @@
 package com.bookstore.bookstore_backend.model.User;
 
 import com.bookstore.bookstore_backend.model.cart.CartItem;
-import com.bookstore.bookstore_backend.model.order.OrderItem;
+import com.bookstore.bookstore_backend.model.order.Order;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<OrderItem> orderItems = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_auth_id", referencedColumnName = "id", nullable = false, unique = true)
@@ -134,16 +134,16 @@ public class User {
         this.cartItems.add(cartItem);
     }
 
-    public List<OrderItem> getOrderItems() {
-        return orderItems;
+    public List<Order> getOrders() {
+        return orders;
     }
 
-    public void setOrderItems(List<OrderItem> orderItems) {
-        this.orderItems = orderItems;
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
     }
 
-    public void addOrderItem(OrderItem orderItem) {
-        this.orderItems.add(orderItem);
+    public void addOrder(Order order) {
+        this.orders.add(order);
     }
 
     public UserAuth getUserAuth() {

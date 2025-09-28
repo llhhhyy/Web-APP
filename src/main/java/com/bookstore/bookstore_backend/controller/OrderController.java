@@ -2,8 +2,8 @@ package com.bookstore.bookstore_backend.controller;
 
 import com.bookstore.bookstore_backend.model.ResponseMessage;
 import com.bookstore.bookstore_backend.model.User.User;
-import com.bookstore.bookstore_backend.model.order.OrderItem;
-import com.bookstore.bookstore_backend.model.order.OrderItemDTO;
+import com.bookstore.bookstore_backend.model.order.Order;
+import com.bookstore.bookstore_backend.model.order.OrderDTO;
 import com.bookstore.bookstore_backend.model.order.OrderMessage;
 import com.bookstore.bookstore_backend.model.order.OrderStatisticsDTO;
 import com.bookstore.bookstore_backend.repository.UserRepository;
@@ -32,63 +32,47 @@ public class OrderController {
     private KafkaTemplate<String, OrderMessage> kafkaTemplate;
 
     @GetMapping("/get")
-    public ResponseMessage<List<OrderItem>> getUserOrder() {
-        // 从安全上下文获取当前用户名
+    public ResponseMessage<List<Order>> getUserOrders() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // 根据用户名查询用户ID
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
-
-        return ResponseMessage.success(orderService.getUserOrder(user.getId()));
+        return ResponseMessage.success(orderService.getUserOrders(user.getId()));
     }
 
     @PostMapping("/add")
-    public ResponseMessage<String> addBookToOrder(@RequestBody OrderItemDTO orderItemDTO) {
+    public ResponseMessage<String> createOrder(@RequestBody OrderDTO orderDTO) {
         try {
-            // 从安全上下文获取当前用户名
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-            // 根据用户名查询用户ID
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
 
-            System.out.println("Received order request from user: " + user.getId() + " for book: " + orderItemDTO.getBookId() + " with quantity: " + orderItemDTO.getNumber());
-            // 组装消息
-            OrderMessage orderMessage = new OrderMessage(user.getId(), orderItemDTO);
-
-            // 发送到Kafka
-            kafkaTemplate.send("order_topic", orderMessage);  // 发送到order_topic
+            System.out.println("Received order request from user: " + user.getId() + " with items: " + orderDTO.getItems().size());
+            OrderMessage orderMessage = new OrderMessage(user.getId(), orderDTO);
+            kafkaTemplate.send("order_topic", orderMessage);
 
             System.out.println("Order message sent to Kafka: " + orderMessage);
-
-            return ResponseMessage.success("订单已提交，正在异步处理");  // 返回给前端，告知异步处理
+            return ResponseMessage.success("订单已提交，正在异步处理");
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
     @GetMapping("/search")
-    public ResponseMessage<List<OrderItem>> searchUserOrders(
+    public ResponseMessage<List<Order>> searchUserOrders(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        // 从安全上下文获取当前用户名
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // 根据用户名查询用户ID
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
-
         return ResponseMessage.success(orderService.searchUserOrders(user.getId(), keyword, startTime, endTime));
     }
 
     @GetMapping("/admin/search")
-    public ResponseMessage<List<OrderItem>> searchAllOrders(
+    public ResponseMessage<List<Order>> searchAllOrders(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-
         return ResponseMessage.success(orderService.searchAllOrders(keyword, startTime, endTime));
     }
 
@@ -102,5 +86,4 @@ public class OrderController {
         OrderStatisticsDTO stats = orderService.getUserOrderStatistics(user.getId(), startTime, endTime);
         return ResponseMessage.success(stats);
     }
-
 }
