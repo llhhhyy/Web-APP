@@ -1,4 +1,4 @@
-import {Button, Dropdown, Form, Layout, Menu, Modal, Space, Input} from "antd";
+import {Button, Dropdown, Form, Layout, Menu, Modal, Space, Input, message} from "antd";
 import {Content, Footer, Header} from "antd/es/layout/layout";
 import {Link, useLocation, useNavigate} from "react-router-dom";
 import {useState, useEffect, useContext} from "react";
@@ -7,6 +7,7 @@ import {siderMenuItems} from "./layout_Items";
 import {UserOutlined} from "@ant-design/icons";
 import {BASEURL} from "../service/common";
 import {logout} from "../service/user"
+import { useRef } from "react";
 import "../css/layout.css";
 import icon from "../image/icon.png";
 import axios from "axios";
@@ -38,6 +39,7 @@ export function PrivateLayout({children}) {
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [passwordForm] = Form.useForm();
     const [loading, setLoading] = useState(true);
+    const ws = useRef(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -82,6 +84,39 @@ export function PrivateLayout({children}) {
             setLoading(false);
         }
     }, [navigate, setUser, user, messageApi]);
+
+    useEffect(() => {
+        if (!user?.id) {
+            message.error("请先登录");
+            return;
+        }
+
+        // 建立WebSocket连接
+        ws.current = new WebSocket("ws://localhost:8082/websocket/order");
+
+        ws.current.onopen = () => {
+            console.log("WebSocket连接开启");
+        };
+
+        ws.current.onmessage = (event) => {
+            console.log(event.data);
+            alert("收到WebSocket消息"+ event.data);
+            message.success(event.data);  // 显示结果
+        };
+
+        ws.current.onclose = () => {
+            console.log("WebSocket连接关闭");
+        };
+
+        ws.current.onerror = (error) => {
+            console.error("WebSocket错误: ", error);
+        };
+
+        return () => {
+            if (ws.current) ws.current.close();
+        };
+    }, [user]);
+
 
     const handleChangePassword = async (values) => {
         try {

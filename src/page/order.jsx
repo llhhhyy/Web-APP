@@ -16,19 +16,29 @@ function OrderPage() {
     const [form] = Form.useForm();
 
     const fetchOrders = async (params = {}) => {
+        message.config("开始获取订单...");
         try {
             setLoading(true);
-            const response = await axios.get(`${BASEURL}/order/search`, { params });
+            let url = `${BASEURL}/order/get`;
+            let config = {};
+            if (Object.keys(params).length > 0) {
+                url = `${BASEURL}/order/search`;
+                config = { params };
+            }
+            const response = await axios.get(url, config);
+            console.log(response);
             if (response.data.code === 200) {
                 // 处理多物品订单：计算总价，并保留 orderItems
+                console.log(response.data.data.orderItems);
                 setOrders(
                     response.data.data.map((order) => ({
                         ...order,
                         key: order.id,
-                        totalPrice: order.orderItems.reduce(
-                            (sum, item) => sum + parseFloat(item.book.price) * item.number,
-                            0
-                        ).toFixed(2),
+                        totalPrice: order.orderItems
+                            ? order.orderItems
+                                .reduce((sum, item) => sum + parseFloat(item.bookPrice) * item.number, 0)
+                                .toFixed(2)
+                            : "0.00",
                     }))
                 );
             } else {
@@ -47,7 +57,7 @@ function OrderPage() {
             setOrders([]);
             return;
         }
-        fetchOrders(); // 初始获取所有订单
+        fetchOrders(); // 初始获取所有订单，使用 /order/get
     }, [user]);
 
     const handleSearch = (values) => {
@@ -57,24 +67,24 @@ function OrderPage() {
             startTime: dateRange && dateRange[0] ? dateRange[0].toISOString() : undefined,
             endTime: dateRange && dateRange[1] ? dateRange[1].toISOString() : undefined,
         };
-        fetchOrders(params);
+        fetchOrders(params); // 搜索时使用 /order/search
     };
 
     const handleReset = () => {
         form.resetFields();
-        fetchOrders();
+        fetchOrders(); // 重置时使用 /order/get
     };
 
     // 子表格列：显示订单物品详情
     const itemColumns = [
         {
             title: "书籍",
-            dataIndex: "book",
-            key: "book",
-            render: (book) => (
+            dataIndex: "bookTitle",
+            key: "bookTitle",
+            render: (text, record) => (
                 <div className="product-details">
-                    <Image src={book.cover} alt={book.title} width={50} />
-                    <span style={{ marginLeft: 8 }}>{book.title}</span>
+                    <Image src={record.bookCover} alt={text} width={50} />
+                    <span style={{ marginLeft: 8 }}>{text}</span>
                 </div>
             ),
         },
@@ -86,9 +96,9 @@ function OrderPage() {
         },
         {
             title: "单价",
-            dataIndex: "book",
-            key: "price",
-            render: (book) => `¥${book.price}`,
+            dataIndex: "bookPrice",
+            key: "bookPrice",
+            render: (price) => `¥${price}`,
         },
     ];
 

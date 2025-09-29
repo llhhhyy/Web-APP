@@ -1,61 +1,71 @@
-/* 修改 .order-page 部分 */
+/* 使 .order-page 宽度自适应 */
 .order-page {
-    max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     font-family: Arial, sans-serif;
     padding: 0 20px;
+    box-sizing: border-box;
 }
 
-/* 新增表格布局调整 */
+/* 表格布局调整 */
 table {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
-    table-layout: fixed; /* 确保表格布局稳定 */
+    table-layout: fixed; /* 保持列宽比例固定 */
 }
+
+/* 表头背景 */
 thead {
     background-color: #f0f0f0;
 }
+
+/* 单元格样式 */
 th, td {
     padding: 10px;
     border-right: 1px solid #e8e8e8;
     box-sizing: border-box;
+    text-align: center; /* 默认居中对齐 */
 }
+
+/* 移除最后一列的右边框 */
 th:last-child, td:last-child {
     border-right: none;
 }
 
-/* 订单ID列自适应 */
-th:nth-child(1), td:nth-child(1) {
-    width: auto; /* 改为自适应宽度 */
-    min-width: 80px; /* 最小宽度保证 */
-    text-align: center;
+/* 缩小展开按钮列 */
+.ant-table-row-expand-icon-cell {
+    width: 40px !important; /* 尽可能缩小，保持可点击 */
+    min-width: 30px;
+    padding: 5 !important; /* 减少内边距 */
 }
 
-/* 调整其他列宽 */
+/* 主表格列宽分配，使用百分比以自适应 */
 th:nth-child(2), td:nth-child(2) {
-    width: 12%;
-    text-align: center;
-}
-th:nth-child(3), td:nth-child(3) {
-    width: 20%;
-    text-align: left;
-}
-th:nth-child(4), td:nth-child(4),
-th:nth-child(5), td:nth-child(5) {
-    width: 8%;
-    text-align: center;
-}
-th:nth-child(6), td:nth-child(6) {
-    width: 22%;
-    text-align: left;
-}
-th:nth-child(7), td:nth-child(7) {
-    width: 15%;
-    text-align: center;
+    width: 15%; /* 订单ID */
+    min-width: 80px;
 }
 
-td:nth-child(4) {
+th:nth-child(3), td:nth-child(3) {
+    width: 15%; /* 总价 */
+}
+
+th:nth-child(4), td:nth-child(4) {
+    width: 20%; /* 收货人 */
+    text-align: left;
+}
+
+th:nth-child(5), td:nth-child(5) {
+    width: 30%; /* 收货地址 */
+    text-align: left;
+}
+
+th:nth-child(6), td:nth-child(6) {
+    width: 20%; /* 订单时间 */
+}
+
+/* 收货地址高亮 */
+td:nth-child(5) {
     color: red;
     font-weight: bold;
 }
@@ -71,7 +81,29 @@ td:nth-child(4) {
     line-height: 1.4;
 }
 
-/* 其余样式保持不变 */
+/* 子表格（订单项）列宽调整 */
+.table-container .ant-table table {
+    width: 100%;
+}
+
+/* 子表格列宽 */
+.table-container .ant-table table th:nth-child(1),
+.table-container .ant-table table td:nth-child(1) {
+    width: 60%; /* 书籍信息 */
+    text-align: left;
+}
+
+.table-container .ant-table table th:nth-child(2),
+.table-container .ant-table table td:nth-child(2) {
+    width: 20%; /* 数量 */
+}
+
+.table-container .ant-table table th:nth-child(3),
+.table-container .ant-table table td:nth-child(3) {
+    width: 20%; /* 单价 */
+}
+
+/* 产品详情样式 */
 .product-details {
     display: flex;
     align-items: center;
@@ -86,37 +118,99 @@ td:nth-child(4) {
     word-break: break-word;
     flex: 1;
 }
+
+/* 表格行边框 */
 tbody tr {
     border-bottom: 1px solid #e8e8e8;
 }
+
+/* 卡片容器 */
 .card-container {
     margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%; /* 卡片宽度自适应 */
 }
-/*.search-container {*/
-/*    margin-bottom: 20px;*/
-/*    padding: 16px;*/
-/*    background-color: #f5f5f5;*/
-/*    border-radius: 4px;*/
-/*}*/
+
+/* 表格容器 */
 .table-container {
     margin-top: 20px;
+    width: 100%;
 }
+
+/* 搜索容器 */
 .order-page .search-container {
     margin-bottom: 20px;
 }
-.order-page .card-container {
-    margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+/* 响应式设计：小屏幕调整 */
+@media (max-width: 768px) {
+    /* 缩小字体和内边距 */
+    table {
+        font-size: 12px;
+    }
+    th, td {
+        padding: 8px;
+    }
+
+    /* 进一步缩小展开按钮列 */
+    .ant-table-row-expand-icon-cell {
+        width: 25px !important;
+        min-width: 25px;
+    }
+
+    /* 调整列宽 */
+    th:nth-child(2), td:nth-child(2) {
+        width: 20%;
+        min-width: 60px;
+    }
+    th:nth-child(3), td:nth-child(3) {
+        width: 20%;
+    }
+    th:nth-child(4), td:nth-child(4) {
+        width: 25%;
+    }
+    th:nth-child(5), td:nth-child(5) {
+        width: 35%;
+    }
+    th:nth-child(6), td:nth-child(6) {
+        display: none; /* 小屏幕隐藏订单时间 */
+    }
+
+    /* 子表格列宽 */
+    .table-container .ant-table table th:nth-child(1),
+    .table-container .ant-table table td:nth-child(1) {
+        width: 50%;
+    }
+    .table-container .ant-table table th:nth-child(2),
+    .table-container .ant-table table td:nth-child(2) {
+        width: 25%;
+    }
+    .table-container .ant-table table th:nth-child(3),
+    .table-container .ant-table table td:nth-child(3) {
+        width: 25%;
+    }
+
+    .product-details img {
+        width: 40px;
+        height: 40px;
+    }
 }
-.product-details .book-info {
-    margin-left: 12px;
-}
-.product-details .book-title {
-    font-weight: 500;
-    max-width: 200px;
-}
-.total-price {
-    font-weight: bold;
-    color: #f5222d;
+
+@media (max-width: 480px) {
+    /* 进一步缩小字体 */
+    table {
+        font-size: 10px;
+    }
+    th, td {
+        padding: 6px;
+    }
+    .ant-table-row-expand-icon-cell {
+        width: 20px !important;
+        min-width: 20px;
+    }
+    .product-details img {
+        width: 30px;
+        height: 30px;
+    }
 }
