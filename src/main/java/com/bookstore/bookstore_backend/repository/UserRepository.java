@@ -17,11 +17,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "u.id AS userId, " +
             "u.username AS username, " +
             "u.email AS email, " +
-            "COALESCE(SUM(CAST(b.price AS double) * oi.number), 0.0) AS totalConsumption " +
+            "COALESCE(SUM(CAST(oi.book.price AS double) * oi.number), 0.0) AS totalConsumption " +
             "FROM User u " +
-            "LEFT JOIN u.orderItems oi " +
-            "LEFT JOIN oi.book b " +
+            "LEFT JOIN u.orders o " +
+            "LEFT JOIN o.orderItems oi " +
             "GROUP BY u.id, u.username, u.email " +
-            "ORDER BY COALESCE(SUM(CAST(b.price AS double) * oi.number), 0.0) DESC")
+            "ORDER BY COALESCE(SUM(CAST(oi.book.price AS double) * oi.number), 0.0) DESC")
     List<UserConsumptionProjection> findUserConsumptionRanking();
 }

@@ -34,7 +34,6 @@ public class Book {
     @Column(nullable = false)
     private int inventory = 100; // 新增库存字段，默认值为100
 
-    @Column(nullable = false)
     private int sales = 0;
 
     public int getSales() {

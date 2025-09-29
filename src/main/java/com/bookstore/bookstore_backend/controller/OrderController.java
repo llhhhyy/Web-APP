@@ -2,10 +2,7 @@ package com.bookstore.bookstore_backend.controller;
 
 import com.bookstore.bookstore_backend.model.ResponseMessage;
 import com.bookstore.bookstore_backend.model.User.User;
-import com.bookstore.bookstore_backend.model.order.Order;
-import com.bookstore.bookstore_backend.model.order.OrderDTO;
-import com.bookstore.bookstore_backend.model.order.OrderMessage;
-import com.bookstore.bookstore_backend.model.order.OrderStatisticsDTO;
+import com.bookstore.bookstore_backend.model.order.*;
 import com.bookstore.bookstore_backend.repository.UserRepository;
 import com.bookstore.bookstore_backend.services.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +29,7 @@ public class OrderController {
     private KafkaTemplate<String, OrderMessage> kafkaTemplate;
 
     @GetMapping("/get")
-    public ResponseMessage<List<Order>> getUserOrders() {
+    public ResponseMessage<List<OrderResponseDTO>> getUserOrders() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));

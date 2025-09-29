@@ -11,6 +11,18 @@ public class OrderItemDTO {
     @Min(value = 1, message = "数量至少为1")
     private int number = 1;
 
+    private String bookTitle;
+    private String bookPrice;
+    private String bookCover;
+
+    // Getters and Setters
+    public String getBookTitle() { return bookTitle; }
+    public void setBookTitle(String bookTitle) { this.bookTitle = bookTitle; }
+    public String getBookPrice() { return bookPrice; }
+    public void setBookPrice(String bookPrice) { this.bookPrice = bookPrice; }
+    public String getBookCover() { return bookCover; }
+    public void setBookCover(String bookCover) { this.bookCover = bookCover; }
+
     public Long getBookId() {
         return bookId;
     }

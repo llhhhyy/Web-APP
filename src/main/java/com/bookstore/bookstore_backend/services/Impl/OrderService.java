@@ -2,23 +2,21 @@ package com.bookstore.bookstore_backend.services.Impl;
 
 import com.bookstore.bookstore_backend.model.User.User;
 import com.bookstore.bookstore_backend.model.book.Book;
-import com.bookstore.bookstore_backend.model.order.Order;
-import com.bookstore.bookstore_backend.model.order.OrderItem;
-import com.bookstore.bookstore_backend.model.order.OrderItemDTO;
-import com.bookstore.bookstore_backend.model.order.OrderDTO;
-import com.bookstore.bookstore_backend.model.order.OrderStatisticsDTO;
+import com.bookstore.bookstore_backend.model.order.*;
 import com.bookstore.bookstore_backend.repository.BookRepository;
 import com.bookstore.bookstore_backend.repository.OrderRepository;
 import com.bookstore.bookstore_backend.repository.UserRepository;
 import com.bookstore.bookstore_backend.services.IOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService implements IOrderService {
@@ -30,13 +28,33 @@ public class OrderService implements IOrderService {
     private UserRepository userRepository;
 
     @Override
-    public List<Order> getUserOrders(Long userId) {
+    public List<OrderResponseDTO> getUserOrders(Long userId) {
         userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("无效的用户id，该用户不存在"));
-        return orderRepository.findByUserId(userId);
+        List<Order> orders = orderRepository.findByUserId(userId);
+        return orders.stream().map(order -> {
+            OrderResponseDTO dto = new OrderResponseDTO();
+            dto.setId(order.getId());
+            dto.setUserId(order.getUserId());
+            dto.setRecipient(order.getRecipient());
+            dto.setPhone(order.getPhone());
+            dto.setAddress(order.getAddress());
+            dto.setCreatedAt(order.getCreatedAt());
+            List<OrderItemDTO> itemDTOs = order.getOrderItems().stream().map(item -> {
+                OrderItemDTO itemDTO = new OrderItemDTO();
+                itemDTO.setBookId(item.getBookId());
+                itemDTO.setNumber(item.getNumber());
+                itemDTO.setBookTitle(item.getBook().getTitle());
+                itemDTO.setBookPrice(item.getBook().getPrice());
+                itemDTO.setBookCover(item.getBook().getCover());
+                return itemDTO;
+            }).collect(Collectors.toList());
+            dto.setOrderItems(itemDTOs);
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Order createOrder(Long userId, OrderDTO orderDTO) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("无效的用户id，该用户不存在"));

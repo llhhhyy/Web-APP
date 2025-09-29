@@ -1,6 +1,7 @@
 package com.bookstore.bookstore_backend.repository;
 
 import com.bookstore.bookstore_backend.model.order.Order;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    @EntityGraph(attributePaths = {"orderItems", "orderItems.book"})
     List<Order> findByUserId(Long userId);
 
     @Query("SELECT o FROM Order o " +
